@@ -15,6 +15,8 @@
             --text-muted: #8b95a5;
             --accent-blue: #0088ff;
             --accent-yellow: #ffd700;
+            --accent-green: #00e676;
+            --accent-red: #ff4d4d;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -102,24 +104,28 @@
         .rank-col { font-family: 'Oswald', sans-serif; font-size: 1.2rem; width: 80px; text-align: center; }
         .points-col { font-family: 'Oswald', sans-serif; font-size: 1.1rem; font-weight: bold; }
 
-        /* Vyskakovací okno (Modal) pro detail hráče */
+        /* --- KARTA HRÁČE (MODAL) --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
             display: none; align-items: center; justify-content: center; z-index: 1000;
         }
         .modal-card {
             background-color: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 16px; width: 90%; max-width: 500px; padding: 30px; position: relative;
+            border-radius: 16px; width: 95%; max-width: 650px; max-height: 90vh; overflow-y: auto;
+            position: relative; padding: 0;
             box-shadow: 0 20px 50px rgba(0,0,0,0.9);
         }
-        .close-btn {
-            position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--text-muted);
-            cursor: pointer; transition: color 0.2s;
-        }
-        .close-btn:hover { color: #fff; }
         
-        .modal-header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+        /* Modal - Tlačítko zavřít plovoucí */
+        .close-btn {
+            position: sticky; top: 15px; float: right; margin-right: 20px; z-index: 10;
+            font-size: 1.5rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s;
+            background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 50%;
+        }
+        .close-btn:hover { color: #fff; background: var(--accent-red); }
+        
+        .modal-header { text-align: center; margin-bottom: 20px; padding: 30px 30px 10px 30px; border-bottom: 1px solid var(--border-color); }
         .modal-avatar {
             width: 80px; height: 80px; margin: 0 auto 15px auto; border-radius: 50%;
             background: linear-gradient(135deg, #ff4d29, #ffd700);
@@ -127,11 +133,46 @@
         }
         .modal-name { font-family: 'Oswald', sans-serif; font-size: 1.8rem; }
         
-        .modal-stats { display: flex; flex-direction: column; gap: 12px; }
-        .modal-stat-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 12px 20px; border-radius: 8px; }
-        .modal-stat-label { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
-        .modal-stat-val { font-family: 'Oswald', sans-serif; font-size: 1.25rem; }
+        .modal-content { padding: 0 30px 30px 30px; }
+
+        /* Modal - Základní statistiky */
+        .modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
+        .modal-stat-box { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);}
+        .modal-stat-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px;}
+        .modal-stat-val { font-family: 'Oswald', sans-serif; font-size: 1.2rem; }
         .val-total { color: var(--accent-yellow); font-size: 1.4rem; }
+        .box-highlight { background: rgba(255, 215, 0, 0.05); border-color: rgba(255, 215, 0, 0.3); }
+
+        /* Modal - Tipy na pořadí týmů (Grid) */
+        .modal-subtitle { font-family: 'Oswald', sans-serif; font-size: 1.2rem; color: var(--accent-blue); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
+        
+        .teams-scroller {
+            display: flex; overflow-x: auto; gap: 5px; padding-bottom: 15px; margin-bottom: 20px;
+            scrollbar-width: thin; scrollbar-color: var(--accent-blue) var(--bg-card);
+        }
+        .teams-scroller::-webkit-scrollbar { height: 8px; }
+        .teams-scroller::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 4px; }
+        
+        .team-col {
+            display: flex; flex-direction: column; align-items: center; min-width: 65px;
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 5px;
+        }
+        .t-pos { font-family: 'Oswald', sans-serif; font-size: 1rem; color: var(--text-muted); margin-bottom: 10px; }
+        .t-logo { width: 35px; height: 35px; object-fit: contain; margin-bottom: 10px; }
+        .t-pts { font-family: 'Oswald', sans-serif; font-size: 1.1rem; color: #fff; }
+        .pts-high { color: var(--accent-green); }
+        .pts-zero { color: var(--text-muted); }
+
+        /* Modal - Bonusové otázky */
+        .bonus-list { display: flex; flex-direction: column; gap: 10px; }
+        .bonus-item {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 12px 15px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .bonus-text { flex-grow: 1; padding-right: 15px; }
+        .b-question { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 3px; }
+        .b-answer { font-weight: 600; font-size: 0.95rem; color: #fff;}
+        .b-pts { font-family: 'Oswald', sans-serif; font-size: 1.2rem; min-width: 40px; text-align: center; }
 
         .loader { text-align: center; padding: 40px; color: var(--text-muted); }
     </style>
@@ -172,7 +213,7 @@
                     </tr>
                 </thead>
                 <tbody id="tabulka-telo">
-                    <tr><td colspan="3" class="loader">Načítám data z tabulky...</td></tr>
+                    <tr><td colspan="3" class="loader">Načítám data ze všech tabulek... Může to chvíli trvat.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -181,42 +222,84 @@
     <div class="modal-overlay" id="playerModal" onclick="zavriModal(event)">
         <div class="modal-card">
             <i class="fas fa-times close-btn" onclick="document.getElementById('playerModal').style.display='none'"></i>
+            
             <div class="modal-header">
                 <div class="modal-avatar" id="modalInitials">--</div>
                 <div class="modal-name" id="modalName">Jméno Hráče</div>
             </div>
-            <div class="modal-stats">
-                <div class="modal-stat-row">
-                    <span class="modal-stat-label">Body za umístění</span>
-                    <span class="modal-stat-val" id="modalPtsUmisteni">-</span>
+            
+            <div class="modal-content">
+                <div class="modal-stats">
+                    <div class="modal-stat-box box-highlight">
+                        <span class="modal-stat-label">Celkové pořadí</span>
+                        <span class="modal-stat-val val-total" id="modalRankTotal">-</span>
+                    </div>
+                    <div class="modal-stat-box box-highlight">
+                        <span class="modal-stat-label">Celkem bodů</span>
+                        <span class="modal-stat-val val-total" id="modalPtsTotal">-</span>
+                    </div>
+                    <div class="modal-stat-box">
+                        <span class="modal-stat-label">Pořadí týmů (Pořadí / Body)</span>
+                        <span class="modal-stat-val"><span id="modalRankUmisteni"></span>. <span style="color:var(--text-muted);">/</span> <span id="modalPtsUmisteni"></span> b.</span>
+                    </div>
+                    <div class="modal-stat-box">
+                        <span class="modal-stat-label">Bonusy (Pořadí / Body)</span>
+                        <span class="modal-stat-val"><span id="modalRankBonus"></span>. <span style="color:var(--text-muted);">/</span> <span id="modalPtsBonus"></span> b.</span>
+                    </div>
                 </div>
-                <div class="modal-stat-row">
-                    <span class="modal-stat-label">Pořadí za umístění</span>
-                    <span class="modal-stat-val" id="modalRankUmisteni">-</span>
-                </div>
-                <div class="modal-stat-row">
-                    <span class="modal-stat-label">Body za bonusové otázky</span>
-                    <span class="modal-stat-val" id="modalPtsBonus">-</span>
-                </div>
-                <div class="modal-stat-row">
-                    <span class="modal-stat-label">Pořadí za bonusové otázky</span>
-                    <span class="modal-stat-val" id="modalRankBonus">-</span>
-                </div>
-                <div class="modal-stat-row" style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3);">
-                    <span class="modal-stat-label" style="color: var(--accent-yellow); font-weight:bold;">Celkem bodů</span>
-                    <span class="modal-stat-val val-total" id="modalPtsTotal">-</span>
-                </div>
-                <div class="modal-stat-row" style="background: rgba(0, 136, 255, 0.1); border: 1px solid rgba(0, 136, 255, 0.3);">
-                    <span class="modal-stat-label" style="color: var(--accent-blue); font-weight:bold;">Celkové pořadí</span>
-                    <span class="modal-stat-val val-total" id="modalRankTotal">-</span>
-                </div>
+
+                <div class="modal-subtitle">Tipy na konečné umístění týmů</div>
+                <div class="teams-scroller" id="modalTeams">
+                    </div>
+
+                <div class="modal-subtitle">Bonusové otázky</div>
+                <div class="bonus-list" id="modalBonuses">
+                    </div>
             </div>
         </div>
     </div>
 
     <script>
-        const dataUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQV9zgAr6YDisVCJo-k3t9iusjzfA_WBchSObYJ8rAIve99NBzTlr6OD-ahb57CdM08PgmFqwRp02kQ/pub?gid=1446924552&single=true&output=csv';
-        
+        // Odkazy na 3 CSV soubory
+        const urlPrehled = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQV9zgAr6YDisVCJo-k3t9iusjzfA_WBchSObYJ8rAIve99NBzTlr6OD-ahb57CdM08PgmFqwRp02kQ/pub?gid=1446924552&single=true&output=csv';
+        const urlTipy = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQV9zgAr6YDisVCJo-k3t9iusjzfA_WBchSObYJ8rAIve99NBzTlr6OD-ahb57CdM08PgmFqwRp02kQ/pub?gid=0&single=true&output=csv';
+        const urlKontrola = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQV9zgAr6YDisVCJo-k3t9iusjzfA_WBchSObYJ8rAIve99NBzTlr6OD-ahb57CdM08PgmFqwRp02kQ/pub?gid=1129220254&single=true&output=csv';
+
+        const teamLogos = {
+            "Slavia Praha": "https://i.imgur.com/g1Zkhwg.png",
+            "Sparta Praha": "https://i.imgur.com/NlyfFAC.png",
+            "Viktoria Plzeň": "https://i.imgur.com/SPtzSGy.png",
+            "Baník Ostrava": "https://i.imgur.com/fhj9qlu.png",
+            "Mladá Boleslav": "https://i.imgur.com/faCQUVA.png",
+            "Sigma Olomouc": "https://i.imgur.com/EQKL3hu.png",
+            "Jablonec": "https://i.imgur.com/e4ci4Rt.png",
+            "Bohemians Praha": "https://i.imgur.com/sqSgm4a.png",
+            "Slovan Liberec": "https://i.imgur.com/CDcqChc.png",
+            "Teplice": "https://i.imgur.com/t1u7O9z.png",
+            "Slovácko": "https://i.imgur.com/J9s2CwL.png",
+            "Dukla Praha": "https://i.imgur.com/FZ2Lzu2.png",
+            "Pardubice": "https://i.imgur.com/3ZjvyQX.png",
+            "Hradec Králové": "https://i.imgur.com/iyfKeMv.png",
+            "Karviná": "https://i.imgur.com/j7hx1cA.png",
+            "Zlín": "https://i.imgur.com/7EseGiq.png"
+        };
+
+        const bonusQuestionsText = [
+            "Kdo ovládne základní část soutěže?",
+            "Sestoupí prvoligový tým do druhé ligy po prohře v baráži?",
+            "Kolik bodů získá mistr Chance ligy během celé sezóny?",
+            "Jaký bude bodový rozdíl mezi 1. a 2. místem?",
+            "Kolik bodů získá poslední tým tabulky během celé sezóny?",
+            "Nejlepší střelec Chance ligy na konci sezóny:",
+            "Kolik gólů vstřelí nejlepší střelec soutěže?",
+            "Který tým obdrží nejvíce žlutých karet?",
+            "Který tým obdrží nejvíce červených karet?",
+            "Který tým bude mít největší úspěšnost přihrávek?",
+            "Který tým bude mít na svém kontě nejvíce faulů?",
+            "Který tým bude v nejvíce ofsajdech?",
+            "Který tým během zápasů získá nejvíce míčů od soupeře?"
+        ];
+
         let vsichniHraci = [];
         let aktivniZalozka = 'celkem';
 
@@ -225,21 +308,16 @@
             return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
         }
 
-        // Pokročilý inteligentní CSV parser, který ignoruje čárky uvnitř uvozovek u desetinných čísel
+        // CSV parser
         function parseCSVRow(rowText) {
             let cells = [];
             let insideQuotes = false;
             let currentCell = '';
             for (let i = 0; i < rowText.length; i++) {
                 let char = rowText[i];
-                if (char === '"') {
-                    insideQuotes = !insideQuotes;
-                } else if (char === ',' && !insideQuotes) {
-                    cells.push(currentCell);
-                    currentCell = '';
-                } else {
-                    currentCell += char;
-                }
+                if (char === '"') { insideQuotes = !insideQuotes; } 
+                else if (char === ',' && !insideQuotes) { cells.push(currentCell); currentCell = ''; } 
+                else { currentCell += char; }
             }
             cells.push(currentCell);
             return cells;
@@ -247,45 +325,61 @@
 
         function vycistiCislo(text) {
             if (!text) return 0;
-            // Převede českou desetinnou čárku na tečku pro správný Javascriptový parse
             let ciste = text.replace(/"/g, '').replace(',', '.').trim();
             return parseFloat(ciste) || 0;
         }
 
         async function nactiData() {
             try {
-                const response = await fetch(dataUrl);
-                const data = await response.text();
-                zpracujData(data);
+                // Fetch všeho najednou (paralelně) pro vyšší rychlost
+                const [resPrehled, resTipy, resKontrola] = await Promise.all([
+                    fetch(urlPrehled), fetch(urlTipy), fetch(urlKontrola)
+                ]);
+
+                const csvPrehled = await resPrehled.text();
+                const csvTipy = await resTipy.text();
+                const csvKontrola = await resKontrola.text();
+
+                zpracujVsechnaData(csvPrehled, csvTipy, csvKontrola);
             } catch (error) {
                 console.error('Chyba:', error);
-                document.getElementById('tabulka-telo').innerHTML = '<tr><td colspan="3" class="loader">Chyba při načítání dat.</td></tr>';
+                document.getElementById('tabulka-telo').innerHTML = '<tr><td colspan="3" class="loader">Chyba při načítání dat. Zkontrolujte připojení nebo platnost Google tabulky.</td></tr>';
             }
         }
 
-        function zpracujData(csvText) {
-            const radky = csvText.split('\n');
+        function zpracujVsechnaData(csvPrehled, csvTipy, csvKontrola) {
+            const radkyPrehled = csvPrehled.split('\n');
+            const radkyTipy = csvTipy.split('\n');
+            const radkyKontrola = csvKontrola.split('\n');
+            
             vsichniHraci = [];
 
-            for (let i = 1; i < radky.length; i++) {
-                if (!radky[i].trim()) continue;
+            // Iterujeme přes řádky (1 = první člověk pod hlavičkou)
+            for (let i = 1; i < radkyPrehled.length; i++) {
+                if (!radkyPrehled[i].trim()) continue;
                 
-                // Použití nového parseru buněk
-                const bunky = parseCSVRow(radky[i]); 
-                
-                if(bunky.length >= 45) {
-                    const jmeno = bunky[2].replace(/"/g, '').trim(); 
+                const bunkyP = parseCSVRow(radkyPrehled[i]); 
+                // V Tipy a Kontrola jsou data na tomtéž řádku 'i' (pokud sedí počet hlaviček, obvykle ano)
+                const bunkyT = (i < radkyTipy.length) ? parseCSVRow(radkyTipy[i]) : [];
+                const bunkyK = (i < radkyKontrola.length) ? parseCSVRow(radkyKontrola[i]) : [];
+
+                if(bunkyP.length >= 45) {
+                    const jmeno = bunkyP[2].replace(/"/g, '').trim(); 
                     if (jmeno === "") continue;
 
                     vsichniHraci.push({
                         puvodniIndex: i, 
                         jmeno: jmeno,
-                        bodyUmisteni: vycistiCislo(bunky[39]), // AN
-                        bodyBonus: vycistiCislo(bunky[40]),    // AO
-                        celkem: vycistiCislo(bunky[41]),       // AP
-                        poradiUmisteni: parseInt(bunky[42].replace(/"/g, '')) || 999, // AQ
-                        poradiBonus: parseInt(bunky[43].replace(/"/g, '')) || 999,    // AR
-                        poradiCelkem: parseInt(bunky[44].replace(/"/g, '')) || 999     // AS
+                        // --- Statistiky žebříčků ---
+                        bodyUmisteni: vycistiCislo(bunkyP[39]), 
+                        bodyBonus: vycistiCislo(bunkyP[40]),    
+                        celkem: vycistiCislo(bunkyP[41]),       
+                        poradiUmisteni: parseInt(bunkyP[42].replace(/"/g, '')) || 999, 
+                        poradiBonus: parseInt(bunkyP[43].replace(/"/g, '')) || 999,    
+                        poradiCelkem: parseInt(bunkyP[44].replace(/"/g, '')) || 999,
+                        // --- Surové Tip a Kontrola Data ---
+                        tipyData: bunkyT,
+                        kontrolaData: bunkyK
                     });
                 }
             }
@@ -298,7 +392,7 @@
             const container = document.getElementById('zajici-container');
             container.innerHTML = '';
             
-            // Řádky 3, 5, 6, 7 odpovídají indexům 2, 4, 5, 6 v našem zpracování
+            // Řádky 3, 5, 6, 7 (indexy 2, 4, 5, 6 v poli dat)
             const hledaneIndexy = [2, 4, 5, 6]; 
             const zajici = vsichniHraci.filter(h => hledaneIndexy.includes(h.puvodniIndex));
 
@@ -323,11 +417,9 @@
 
         function zmenZalozku(tabName) {
             aktivniZalozka = tabName;
-            
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
             
-            // Dynamická změna hlavičky tabulky podle vybrané sekce
             const hlavicka = document.getElementById('tabulka-hlavicka');
             if (tabName === 'umisteni') {
                 hlavicka.innerHTML = '<th style="text-align:center;">Pořadí</th><th>Jméno fanouška</th><th style="text-align:right;">Body za umístění</th>';
@@ -336,38 +428,26 @@
             } else {
                 hlavicka.innerHTML = '<th style="text-align:center;">Pořadí</th><th>Jméno fanouška</th><th style="text-align:right;">Celkem bodů</th>';
             }
-
             vykresliTabulku();
         }
 
         function vykresliTabulku() {
             const tbody = document.getElementById('tabulka-telo');
             tbody.innerHTML = '';
-
             let data = [...vsichniHraci];
 
-            if (aktivniZalozka === 'umisteni') {
-                data.sort((a, b) => a.poradiUmisteni - b.poradiUmisteni);
-            } else if (aktivniZalozka === 'bonusy') {
-                data.sort((a, b) => a.poradiBonus - b.poradiBonus);
-            } else {
-                data.sort((a, b) => a.poradiCelkem - b.poradiCelkem);
-            }
+            if (aktivniZalozka === 'umisteni') { data.sort((a, b) => a.poradiUmisteni - b.poradiUmisteni); } 
+            else if (aktivniZalozka === 'bonusy') { data.sort((a, b) => a.poradiBonus - b.poradiBonus); } 
+            else { data.sort((a, b) => a.poradiCelkem - b.poradiCelkem); }
 
             data.forEach(hrac => {
                 const tr = document.createElement('tr');
                 tr.onclick = () => otevriModal(hrac); 
 
-                let poradi = 0;
-                let bodyZobrazeni = 0;
-
-                if (aktivniZalozka === 'umisteni') {
-                    poradi = hrac.poradiUmisteni; bodyZobrazeni = hrac.bodyUmisteni;
-                } else if (aktivniZalozka === 'bonusy') {
-                    poradi = hrac.poradiBonus; bodyZobrazeni = hrac.bodyBonus;
-                } else {
-                    poradi = hrac.poradiCelkem; bodyZobrazeni = hrac.celkem;
-                }
+                let poradi = 0; let bodyZobrazeni = 0;
+                if (aktivniZalozka === 'umisteni') { poradi = hrac.poradiUmisteni; bodyZobrazeni = hrac.bodyUmisteni; } 
+                else if (aktivniZalozka === 'bonusy') { poradi = hrac.poradiBonus; bodyZobrazeni = hrac.bodyBonus; } 
+                else { poradi = hrac.poradiCelkem; bodyZobrazeni = hrac.celkem; }
 
                 let colorClass = poradi === 1 ? 'color: var(--accent-yellow); font-weight: bold;' : '';
 
@@ -384,14 +464,9 @@
             const input = document.getElementById('searchInput').value.toLowerCase();
             const resultBox = document.getElementById('searchResults');
             resultBox.innerHTML = '';
-
-            if (input.length < 1) { // Reaguje ihned od prvního písmene
-                resultBox.style.display = 'none';
-                return;
-            }
+            if (input.length < 1) { resultBox.style.display = 'none'; return; }
 
             const shody = vsichniHraci.filter(h => h.jmeno.toLowerCase().includes(input));
-
             if (shody.length > 0) {
                 resultBox.style.display = 'block';
                 shody.forEach(hrac => {
@@ -412,25 +487,75 @@
         }
 
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.search-container')) {
-                document.getElementById('searchResults').style.display = 'none';
-            }
+            if (!e.target.closest('.search-container')) { document.getElementById('searchResults').style.display = 'none'; }
         });
 
+        // OTEVŘENÍ KARTY DETAILŮ
         function otevriModal(hrac) {
             document.getElementById('modalInitials').innerText = getInitials(hrac.jmeno);
             document.getElementById('modalName').innerText = hrac.jmeno;
             
-            // První jdou vždy Body, pod nimi jejich Pořadí v dané kategorii
+            // Základní statistiky
             document.getElementById('modalPtsUmisteni').innerText = hrac.bodyUmisteni;
-            document.getElementById('modalRankUmisteni').innerText = `${hrac.poradiUmisteni}. místo`;
-            
+            document.getElementById('modalRankUmisteni').innerText = hrac.poradiUmisteni;
             document.getElementById('modalPtsBonus').innerText = hrac.bodyBonus;
-            document.getElementById('modalRankBonus').innerText = `${hrac.poradiBonus}. místo`;
-            
+            document.getElementById('modalRankBonus').innerText = hrac.poradiBonus;
             document.getElementById('modalPtsTotal').innerText = hrac.celkem;
-            document.getElementById('modalRankTotal').innerText = `${hrac.poradiCelkem}. místo`;
+            document.getElementById('modalRankTotal').innerText = hrac.poradiCelkem;
 
+            // 1. Sekce: 16 Týmů
+            const teamsContainer = document.getElementById('modalTeams');
+            teamsContainer.innerHTML = '';
+            
+            if (hrac.tipyData.length > 0 && hrac.kontrolaData.length > 0) {
+                // Týmy a body za pořadí jsou ve sloupcích E-T (indexy 4 až 19 v poli)
+                for (let j = 4; j <= 19; j++) {
+                    const tipTym = hrac.tipyData[j] ? hrac.tipyData[j].replace(/"/g, '').trim() : '';
+                    const ziskaneBody = hrac.kontrolaData[j] ? hrac.kontrolaData[j].replace(/"/g, '').trim() : '0';
+                    
+                    const logoUrl = teamLogos[tipTym] || 'https://i.imgur.com/8N4Jp62.png'; // Záchranný prázdný obrázek
+                    const ptsColor = (ziskaneBody === "10" || ziskaneBody === "9" || ziskaneBody === "8") ? 'pts-high' : (ziskaneBody === "0" ? 'pts-zero' : '');
+
+                    teamsContainer.innerHTML += `
+                        <div class="team-col">
+                            <span class="t-pos">${j - 3}.</span>
+                            <img src="${logoUrl}" alt="${tipTym}" class="t-logo" title="${tipTym}">
+                            <span class="t-pts ${ptsColor}">${ziskaneBody}</span>
+                        </div>
+                    `;
+                }
+            } else {
+                teamsContainer.innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem;">Tipy se nepodařilo načíst.</span>';
+            }
+
+            // 2. Sekce: Bonusy
+            const bonusesContainer = document.getElementById('modalBonuses');
+            bonusesContainer.innerHTML = '';
+
+            if (hrac.tipyData.length > 0 && hrac.kontrolaData.length > 0) {
+                // Bonusy začínají ve sloupci U (index 20) a končí v AG (index 32). Máme 13 otázek.
+                for (let k = 0; k < 13; k++) {
+                    const colIndex = 20 + k;
+                    const tipOdpoved = hrac.tipyData[colIndex] ? hrac.tipyData[colIndex].replace(/"/g, '').trim() : 'Nebylo vyplněno';
+                    const ziskaneBody = hrac.kontrolaData[colIndex] ? hrac.kontrolaData[colIndex].replace(/"/g, '').trim() : '0';
+                    const ptsColor = parseInt(ziskaneBody) > 0 ? 'color: var(--accent-green);' : 'color: var(--text-muted);';
+
+                    bonusesContainer.innerHTML += `
+                        <div class="bonus-item">
+                            <div class="bonus-text">
+                                <div class="b-question">${bonusQuestionsText[k]}</div>
+                                <div class="b-answer">${tipOdpoved}</div>
+                            </div>
+                            <div class="b-pts" style="${ptsColor}">${ziskaneBody}</div>
+                        </div>
+                    `;
+                }
+            } else {
+                bonusesContainer.innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem;">Bonusy se nepodařilo načíst.</span>';
+            }
+
+            // Otevřeme okno (reset scrollu na top)
+            document.getElementById('playerModal').querySelector('.modal-card').scrollTop = 0;
             document.getElementById('playerModal').style.display = 'flex';
         }
 
