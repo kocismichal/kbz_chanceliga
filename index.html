@@ -127,11 +127,11 @@
         }
         .modal-name { font-family: 'Oswald', sans-serif; font-size: 1.8rem; }
         
-        .modal-stats { display: flex; flex-direction: column; gap: 15px; }
-        .modal-stat-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 15px 20px; border-radius: 8px; }
-        .modal-stat-label { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
-        .modal-stat-val { font-family: 'Oswald', sans-serif; font-size: 1.3rem; }
-        .val-total { color: var(--accent-yellow); font-size: 1.5rem; }
+        .modal-stats { display: flex; flex-direction: column; gap: 12px; }
+        .modal-stat-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 12px 20px; border-radius: 8px; }
+        .modal-stat-label { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        .modal-stat-val { font-family: 'Oswald', sans-serif; font-size: 1.25rem; }
+        .val-total { color: var(--accent-yellow); font-size: 1.4rem; }
 
         .loader { text-align: center; padding: 40px; color: var(--text-muted); }
     </style>
@@ -165,10 +165,10 @@
         <div class="table-container">
             <table>
                 <thead>
-                    <tr>
+                    <tr id="tabulka-hlavicka">
                         <th style="text-align:center;">Pořadí</th>
                         <th>Jméno fanouška</th>
-                        <th style="text-align:right;">Získané body</th>
+                        <th style="text-align:right;">Celkem bodů</th>
                     </tr>
                 </thead>
                 <tbody id="tabulka-telo">
@@ -187,28 +187,28 @@
             </div>
             <div class="modal-stats">
                 <div class="modal-stat-row">
-                    <span class="modal-stat-label">Umístění (pořadí)</span>
-                    <span class="modal-stat-val" id="modalRankUmisteni">-</span>
-                </div>
-                <div class="modal-stat-row">
-                    <span class="modal-stat-label">Body za pořadí</span>
+                    <span class="modal-stat-label">Body za umístění</span>
                     <span class="modal-stat-val" id="modalPtsUmisteni">-</span>
                 </div>
                 <div class="modal-stat-row">
-                    <span class="modal-stat-label">Bonusy (pořadí)</span>
-                    <span class="modal-stat-val" id="modalRankBonus">-</span>
+                    <span class="modal-stat-label">Pořadí za umístění</span>
+                    <span class="modal-stat-val" id="modalRankUmisteni">-</span>
                 </div>
                 <div class="modal-stat-row">
-                    <span class="modal-stat-label">Body za bonusy</span>
+                    <span class="modal-stat-label">Body za bonusové otázky</span>
                     <span class="modal-stat-val" id="modalPtsBonus">-</span>
                 </div>
-                <div class="modal-stat-row" style="background: rgba(0, 136, 255, 0.1); border: 1px solid rgba(0, 136, 255, 0.3);">
-                    <span class="modal-stat-label" style="color: var(--accent-blue); font-weight:bold;">Celkové pořadí</span>
-                    <span class="modal-stat-val val-total" id="modalRankTotal">-</span>
+                <div class="modal-stat-row">
+                    <span class="modal-stat-label">Pořadí za bonusové otázky</span>
+                    <span class="modal-stat-val" id="modalRankBonus">-</span>
                 </div>
                 <div class="modal-stat-row" style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3);">
                     <span class="modal-stat-label" style="color: var(--accent-yellow); font-weight:bold;">Celkem bodů</span>
                     <span class="modal-stat-val val-total" id="modalPtsTotal">-</span>
+                </div>
+                <div class="modal-stat-row" style="background: rgba(0, 136, 255, 0.1); border: 1px solid rgba(0, 136, 255, 0.3);">
+                    <span class="modal-stat-label" style="color: var(--accent-blue); font-weight:bold;">Celkové pořadí</span>
+                    <span class="modal-stat-val val-total" id="modalRankTotal">-</span>
                 </div>
             </div>
         </div>
@@ -223,6 +223,33 @@
         function getInitials(name) {
             const parts = name.trim().split(' ');
             return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
+        }
+
+        // Pokročilý inteligentní CSV parser, který ignoruje čárky uvnitř uvozovek u desetinných čísel
+        function parseCSVRow(rowText) {
+            let cells = [];
+            let insideQuotes = false;
+            let currentCell = '';
+            for (let i = 0; i < rowText.length; i++) {
+                let char = rowText[i];
+                if (char === '"') {
+                    insideQuotes = !insideQuotes;
+                } else if (char === ',' && !insideQuotes) {
+                    cells.push(currentCell);
+                    currentCell = '';
+                } else {
+                    currentCell += char;
+                }
+            }
+            cells.push(currentCell);
+            return cells;
+        }
+
+        function vycistiCislo(text) {
+            if (!text) return 0;
+            // Převede českou desetinnou čárku na tečku pro správný Javascriptový parse
+            let ciste = text.replace(/"/g, '').replace(',', '.').trim();
+            return parseFloat(ciste) || 0;
         }
 
         async function nactiData() {
@@ -240,30 +267,25 @@
             const radky = csvText.split('\n');
             vsichniHraci = [];
 
-            // Začínáme od řádku 1 (protože řádek 0 je hlavička tabulky)
             for (let i = 1; i < radky.length; i++) {
                 if (!radky[i].trim()) continue;
                 
-                // Oprava pro CSV: někdy se čísla formátují s čárkou jako desetinnou. Musíme parsovat chytře.
-                // Vzhledem k tomu, že používáš getValues() ze Sheets, může být CSV odděleno čárkami a texty v uvozovkách.
-                // Pro zjednodušení (pokud tam nejsou jména s čárkou):
-                const bunky = radky[i].split(','); 
+                // Použití nového parseru buněk
+                const bunky = parseCSVRow(radky[i]); 
                 
                 if(bunky.length >= 45) {
                     const jmeno = bunky[2].replace(/"/g, '').trim(); 
-                    const celkemPts = parseFloat(bunky[41].replace(/"/g, '')) || 0;
-                    
-                    if (jmeno === "" || (celkemPts === 0 && jmeno === "")) continue;
+                    if (jmeno === "") continue;
 
                     vsichniHraci.push({
-                        puvodniIndex: i, // Zapamatujeme si původní řádek z Google tabulky (kde header=0, 1. člověk=1)
+                        puvodniIndex: i, 
                         jmeno: jmeno,
-                        bodyUmisteni: parseFloat(bunky[39].replace(/"/g, '')) || 0,
-                        bodyBonus: parseFloat(bunky[40].replace(/"/g, '')) || 0,
-                        celkem: celkemPts,
-                        poradiUmisteni: parseInt(bunky[42].replace(/"/g, '')) || 999, 
-                        poradiBonus: parseInt(bunky[43].replace(/"/g, '')) || 999,    
-                        poradiCelkem: parseInt(bunky[44].replace(/"/g, '')) || 999          
+                        bodyUmisteni: vycistiCislo(bunky[39]), // AN
+                        bodyBonus: vycistiCislo(bunky[40]),    // AO
+                        celkem: vycistiCislo(bunky[41]),       // AP
+                        poradiUmisteni: parseInt(bunky[42].replace(/"/g, '')) || 999, // AQ
+                        poradiBonus: parseInt(bunky[43].replace(/"/g, '')) || 999,    // AR
+                        poradiCelkem: parseInt(bunky[44].replace(/"/g, '')) || 999     // AS
                     });
                 }
             }
@@ -276,13 +298,12 @@
             const container = document.getElementById('zajici-container');
             container.innerHTML = '';
             
-            // Řádky v tabulce jsou 3, 5, 6, 7 (což při indexování kde 1. řádek dat je index 1 znamená indexy 2, 4, 5, 6)
-            // Abysme se vyhnuli chybě s indexy, raději je najdeme přímo v poli podle jejich `puvodniIndex`.
+            // Řádky 3, 5, 6, 7 odpovídají indexům 2, 4, 5, 6 v našem zpracování
             const hledaneIndexy = [2, 4, 5, 6]; 
             const zajici = vsichniHraci.filter(h => hledaneIndexy.includes(h.puvodniIndex));
 
             if(zajici.length === 0) {
-                container.innerHTML = '<div class="loader">Zatím nebyly nalezeny data pro Zajíce (řádky 3, 5, 6, 7).</div>';
+                container.innerHTML = '<div class="loader">Zatím nebyly nalezeny data pro Zajíce.</div>';
                 return;
             }
 
@@ -303,10 +324,19 @@
         function zmenZalozku(tabName) {
             aktivniZalozka = tabName;
             
-            // Přepnutí třídy "active" u tlačítek
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
             
+            // Dynamická změna hlavičky tabulky podle vybrané sekce
+            const hlavicka = document.getElementById('tabulka-hlavicka');
+            if (tabName === 'umisteni') {
+                hlavicka.innerHTML = '<th style="text-align:center;">Pořadí</th><th>Jméno fanouška</th><th style="text-align:right;">Body za umístění</th>';
+            } else if (tabName === 'bonusy') {
+                hlavicka.innerHTML = '<th style="text-align:center;">Pořadí</th><th>Jméno fanouška</th><th style="text-align:right;">Body za bonusové otázky</th>';
+            } else {
+                hlavicka.innerHTML = '<th style="text-align:center;">Pořadí</th><th>Jméno fanouška</th><th style="text-align:right;">Celkem bodů</th>';
+            }
+
             vykresliTabulku();
         }
 
@@ -314,7 +344,6 @@
             const tbody = document.getElementById('tabulka-telo');
             tbody.innerHTML = '';
 
-            // Vytvoříme kopii pole pro seřazení podle aktivní záložky
             let data = [...vsichniHraci];
 
             if (aktivniZalozka === 'umisteni') {
@@ -327,7 +356,7 @@
 
             data.forEach(hrac => {
                 const tr = document.createElement('tr');
-                tr.onclick = () => otevriModal(hrac); // Po kliknutí otevře detail
+                tr.onclick = () => otevriModal(hrac); 
 
                 let poradi = 0;
                 let bodyZobrazeni = 0;
@@ -340,7 +369,7 @@
                     poradi = hrac.poradiCelkem; bodyZobrazeni = hrac.celkem;
                 }
 
-                let colorClass = poradi <= 3 ? 'color: var(--accent-yellow);' : '';
+                let colorClass = poradi === 1 ? 'color: var(--accent-yellow); font-weight: bold;' : '';
 
                 tr.innerHTML = `
                     <td class="rank-col" style="${colorClass}">${poradi}.</td>
@@ -351,13 +380,12 @@
             });
         }
 
-        /* --- Vyhledávání a našeptávač --- */
         function hledejHrace() {
             const input = document.getElementById('searchInput').value.toLowerCase();
             const resultBox = document.getElementById('searchResults');
             resultBox.innerHTML = '';
 
-            if (input.length < 2) {
+            if (input.length < 1) { // Reaguje ihned od prvního písmene
                 resultBox.style.display = 'none';
                 return;
             }
@@ -383,38 +411,35 @@
             }
         }
 
-        // Zavření našeptávače při kliknutí mimo
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.search-container')) {
                 document.getElementById('searchResults').style.display = 'none';
             }
         });
 
-        /* --- Karta hráče (Modal) --- */
         function otevriModal(hrac) {
             document.getElementById('modalInitials').innerText = getInitials(hrac.jmeno);
             document.getElementById('modalName').innerText = hrac.jmeno;
             
-            document.getElementById('modalRankUmisteni').innerText = `${hrac.poradiUmisteni}. místo`;
+            // První jdou vždy Body, pod nimi jejich Pořadí v dané kategorii
             document.getElementById('modalPtsUmisteni').innerText = hrac.bodyUmisteni;
+            document.getElementById('modalRankUmisteni').innerText = `${hrac.poradiUmisteni}. místo`;
             
-            document.getElementById('modalRankBonus').innerText = `${hrac.poradiBonus}. místo`;
             document.getElementById('modalPtsBonus').innerText = hrac.bodyBonus;
+            document.getElementById('modalRankBonus').innerText = `${hrac.poradiBonus}. místo`;
             
-            document.getElementById('modalRankTotal').innerText = `${hrac.poradiCelkem}. místo`;
             document.getElementById('modalPtsTotal').innerText = hrac.celkem;
+            document.getElementById('modalRankTotal').innerText = `${hrac.poradiCelkem}. místo`;
 
             document.getElementById('playerModal').style.display = 'flex';
         }
 
         function zavriModal(event) {
-            // Zavře se pouze při kliknutí na tmavé pozadí mimo kartu
             if (event.target.id === 'playerModal') {
                 document.getElementById('playerModal').style.display = 'none';
             }
         }
 
-        // Spustit načítání
         document.addEventListener('DOMContentLoaded', nactiData);
     </script>
 </body>
