@@ -123,7 +123,6 @@
         
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th, td { padding: 14px 20px; border-bottom: 1px solid var(--border-color); }
-        /* Pevná, neprůhledná barva hlavičky se stínem, aby pod ní neprosvítal text */
         th { font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; background-color: #111722; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.5); border-bottom: 2px solid var(--accent-blue); }
         tr { cursor: pointer; transition: background 0.2s; }
         tr:hover { background-color: rgba(255,255,255,0.05); }
@@ -153,14 +152,14 @@
         }
         .close-btn:hover { color: #fff; background: var(--accent-red); }
         
-        .modal-header { text-align: center; margin-bottom: 20px; padding: 30px 30px 10px 30px; border-bottom: 1px solid var(--border-color); }
+        .modal-header { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 20px; padding: 30px 30px 20px 30px; border-bottom: 1px solid var(--border-color); }
         .modal-avatar {
-            width: 80px; height: 80px; margin: 0 auto 15px auto; border-radius: 50%;
+            width: 80px; height: 80px; border-radius: 50%;
             background: linear-gradient(135deg, #ff4d29, #ffd700);
             display: flex; align-items: center; justify-content: center; font-family: 'Oswald'; font-size: 2rem; color: #fff;
-            overflow: hidden;
+            overflow: hidden; margin: 0;
         }
-        .modal-name { font-family: 'Oswald', sans-serif; font-size: 1.8rem; }
+        .modal-name { font-family: 'Oswald', sans-serif; font-size: 1.8rem; margin: 0; }
         .modal-content { padding: 0 30px 30px 30px; }
 
         /* Systém bodování UI */
@@ -199,6 +198,7 @@
 
         @media (max-width: 620px) {
             .teams-grid-8x2 { grid-template-columns: repeat(4, 1fr); }
+            .modal-header { flex-direction: column; gap: 10px; padding-top: 40px;}
         }
 
         /* Bonusové otázky */
@@ -286,12 +286,12 @@
             <div class="modal-content">
                 <div class="modal-stats">
                     <div class="modal-stat-box box-highlight">
-                        <span class="modal-stat-label">Celkové pořadí</span>
-                        <span class="modal-stat-val val-total" id="modalRankTotal">-</span>
-                    </div>
-                    <div class="modal-stat-box box-highlight">
                         <span class="modal-stat-label">Celkem bodů</span>
                         <span class="modal-stat-val val-total" id="modalPtsTotal">-</span>
+                    </div>
+                    <div class="modal-stat-box box-highlight">
+                        <span class="modal-stat-label">Celkové pořadí</span>
+                        <span class="modal-stat-val val-total" id="modalRankTotal">-</span>
                     </div>
                     <div class="modal-stat-box">
                         <span class="modal-stat-label">Pořadí týmů (Pořadí / Body)</span>
@@ -419,7 +419,6 @@
         let spravneOdpovediRow = [];
         let aktivniZalozka = 'celkem';
 
-        // Odstranění diakritiky pro plynulé vyhledávání
         function odstranDiakritiku(text) {
             if (!text) return "";
             return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -447,18 +446,46 @@
             return getInitials(name);
         }
 
-        function parseCSVRow(rowText) {
-            let cells = [];
-            let insideQuotes = false;
+        // Nový robustní parser, který zvláda odřádkování i speciální znaky uvnitř buněk CSV
+        function parseCSVData(text) {
+            const rows = [];
+            let currentRow = [];
             let currentCell = '';
-            for (let i = 0; i < rowText.length; i++) {
-                let char = rowText[i];
-                if (char === '"') { insideQuotes = !insideQuotes; } 
-                else if (char === ',' && !insideQuotes) { cells.push(currentCell); currentCell = ''; } 
-                else { currentCell += char; }
+            let insideQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+
+                if (char === '"') {
+                    if (insideQuotes && nextChar === '"') {
+                        currentCell += '"';
+                        i++; 
+                    } else {
+                        insideQuotes = !insideQuotes;
+                    }
+                } else if (char === ',' && !insideQuotes) {
+                    currentRow.push(currentCell.trim());
+                    currentCell = '';
+                } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                    if (char === '\r' && nextChar === '\n') i++; 
+                    currentRow.push(currentCell.trim());
+                    if (currentRow.some(cell => cell !== '')) {
+                        rows.push(currentRow);
+                    }
+                    currentRow = [];
+                    currentCell = '';
+                } else {
+                    currentCell += char;
+                }
             }
-            cells.push(currentCell);
-            return cells;
+            if (currentCell || currentRow.length > 0) {
+                currentRow.push(currentCell.trim());
+                if (currentRow.some(cell => cell !== '')) {
+                    rows.push(currentRow);
+                }
+            }
+            return rows;
         }
 
         function vycistiCislo(text) {
@@ -476,9 +503,7 @@
                 const csvPrehled = await resPrehled.text();
                 const csvTipy = await resTipy.text();
                 const csvKontrola = await resKontrola.text();
-                
-                let csvHotovo = '';
-                if(resHotovo) csvHotovo = await resHotovo.text();
+                let csvHotovo = resHotovo ? await resHotovo.text() : '';
 
                 zpracujVsechnaData(csvPrehled, csvTipy, csvKontrola, csvHotovo);
             } catch (error) {
@@ -488,28 +513,24 @@
         }
 
         function zpracujVsechnaData(csvPrehled, csvTipy, csvKontrola, csvHotovo) {
-            const radkyPrehled = csvPrehled.split('\n');
-            const radkyTipy = csvTipy.split('\n');
-            const radkyKontrola = csvKontrola.split('\n');
+            const dataPrehled = parseCSVData(csvPrehled);
+            const dataTipy = parseCSVData(csvTipy);
+            const dataKontrola = parseCSVData(csvKontrola);
+            const dataHotovo = csvHotovo ? parseCSVData(csvHotovo) : [];
             
-            if (csvHotovo) {
-                const radkyHotovo = csvHotovo.split('\n');
-                if (radkyHotovo.length > 1) {
-                    spravneOdpovediRow = parseCSVRow(radkyHotovo[1]);
-                }
+            if (dataHotovo.length > 1) {
+                spravneOdpovediRow = dataHotovo[1];
             }
             
             vsichniHraci = [];
 
-            // Načtení úplně všech řádků
-            for (let i = 1; i < radkyPrehled.length; i++) {
-                if (!radkyPrehled[i].trim()) continue;
-                
-                const bunkyP = parseCSVRow(radkyPrehled[i]); 
-                const bunkyT = (i < radkyTipy.length) ? parseCSVRow(radkyTipy[i]) : [];
-                const bunkyK = (i < radkyKontrola.length) ? parseCSVRow(radkyKontrola[i]) : [];
+            // dataPrehled[0] je hlavička
+            for (let i = 1; i < dataPrehled.length; i++) {
+                const bunkyP = dataPrehled[i]; 
+                const bunkyT = (i < dataTipy.length) ? dataTipy[i] : [];
+                const bunkyK = (i < dataKontrola.length) ? dataKontrola[i] : [];
 
-                if(bunkyP.length >= 45) {
+                if(bunkyP && bunkyP.length >= 45) {
                     const jmeno = bunkyP[2].replace(/"/g, '').trim(); 
                     if (jmeno === "") continue;
 
@@ -536,7 +557,6 @@
             const container = document.getElementById('zajici-container');
             container.innerHTML = '';
             
-            // Zajíc indexy odpovídající řádkům 3, 5, 6, 7 (puvodniIndex: 2, 4, 5, 6)
             const hledaneIndexy = [2, 4, 5, 6]; 
             const zajici = vsichniHraci.filter(h => hledaneIndexy.includes(h.puvodniIndex));
 
@@ -626,7 +646,20 @@
                 shody.forEach(hrac => {
                     const div = document.createElement('div');
                     div.className = 'autocomplete-item';
-                    div.innerHTML = `<span><strong>${hrac.jmeno}</strong></span> <span style="color:var(--accent-yellow); font-size:0.9rem;">${hrac.celkem} b.</span>`;
+                    
+                    const cleanName = hrac.jmeno.toLowerCase();
+                    const isCustomAvatar = cleanName.includes("podroužek") || cleanName.includes("folpi") || cleanName.includes("sodoma") || cleanName.includes("dvorka");
+                    const bgStyle = isCustomAvatar ? 'background: transparent;' : 'background: linear-gradient(135deg, #ff4d29, #ffd700);';
+
+                    div.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:bold; overflow:hidden; color:#fff; ${bgStyle}">
+                                ${getAvatarHTML(hrac.jmeno, hrac.puvodniIndex)}
+                            </div>
+                            <span><strong>${hrac.jmeno}</strong></span>
+                        </div> 
+                        <span style="color:var(--accent-yellow); font-size:0.9rem;">${hrac.celkem} b.</span>`;
+                    
                     div.onclick = () => {
                         document.getElementById('searchInput').value = '';
                         resultBox.style.display = 'none';
@@ -653,18 +686,16 @@
             avatarDiv.innerHTML = getAvatarHTML(hrac.jmeno, hrac.puvodniIndex);
             
             document.getElementById('modalName').innerText = hrac.jmeno;
+            document.getElementById('modalPtsTotal').innerText = hrac.celkem;
+            document.getElementById('modalRankTotal').innerText = hrac.poradiCelkem;
             document.getElementById('modalPtsUmisteni').innerText = hrac.bodyUmisteni;
             document.getElementById('modalRankUmisteni').innerText = hrac.poradiUmisteni;
             document.getElementById('modalPtsBonus').innerText = hrac.bodyBonus;
             document.getElementById('modalRankBonus').innerText = hrac.poradiBonus;
-            document.getElementById('modalPtsTotal').innerText = hrac.celkem;
-            document.getElementById('modalRankTotal').innerText = hrac.poradiCelkem;
 
-            // 1. Tabulka: Oficiální pořadí + získané body
             const officialTeamsContainer = document.getElementById('modalOfficialTeams');
             officialTeamsContainer.innerHTML = '';
             
-            // 2. Tabulka: Tipy uživatele (bez bodů)
             const userTeamsContainer = document.getElementById('modalUserTeams');
             userTeamsContainer.innerHTML = '';
             
@@ -672,11 +703,9 @@
 
             if (hrac.tipyData.length > 0 && hrac.kontrolaData.length > 0 && spravneOdpovediRow.length > 0) {
                 for (let j = 4; j <= 19; j++) {
-                    // Data z HOTOVO (Oficiální klub)
                     const ofikoTym = spravneOdpovediRow[j] ? spravneOdpovediRow[j].replace(/"/g, '').trim() : '';
                     const ofikoLogo = teamLogos[ofikoTym] || 'https://i.imgur.com/8N4Jp62.png';
                     
-                    // Data z kontroly (Body)
                     const ziskaneBody = hrac.kontrolaData[j] ? hrac.kontrolaData[j].replace(/"/g, '').trim() : '0';
                     const ptsColor = (ziskaneBody === "10" || ziskaneBody === "8") ? 'pts-high' : (ziskaneBody === "0" ? 'pts-zero' : '');
 
@@ -692,7 +721,6 @@
                         </div>
                     `;
 
-                    // Data uživatele (Jeho tip)
                     const tipTym = hrac.tipyData[j] ? hrac.tipyData[j].replace(/"/g, '').trim() : '';
                     const tipLogo = teamLogos[tipTym] || 'https://i.imgur.com/8N4Jp62.png';
 
@@ -709,7 +737,6 @@
                 userTeamsContainer.innerHTML = err;
             }
 
-            // Vytvoření štítku s násobkem pro lepší pochopení bodování
             let nasobek = 1.0;
             if (pocetPresnychTipuTymu >= 14) nasobek = 1.3;
             else if (pocetPresnychTipuTymu >= 11) nasobek = 1.2;
@@ -717,7 +744,7 @@
 
             let nasobekBarva = nasobek > 1.0 ? 'var(--accent-yellow)' : 'var(--text-muted)';
             let nasobekCislo = nasobek.toFixed(1).replace('.', ',');
-            let nasobekHtml = `<span style="color: ${nasobekBarva}; font-size: 0.85rem; margin-left: 8px; border: 1px solid ${nasobekBarva}; padding: 3px 8px; border-radius: 6px; font-weight: bold; background: rgba(255,215,0,0.05); white-space: nowrap;">- ${nasobekCislo}x násobek bodů</span>`;
+            let nasobekHtml = `<span style="color: ${nasobekBarva}; font-size: 0.85rem; margin-left: 8px; border: 1px solid ${nasobekBarva}; padding: 3px 8px; border-radius: 6px; font-weight: bold; background: rgba(255,215,0,0.05); white-space: nowrap;">${nasobekCislo}x násobek bodů</span>`;
 
             document.getElementById('modalOfficialTeamsTitle').innerHTML = `Výsledné umístění týmů <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal; margin-left: 5px;">(vč. získaných bodů)</span> ${nasobekHtml}`;
 
@@ -729,12 +756,14 @@
                     const colIndex = 20 + k;
                     const tipOdpoved = hrac.tipyData[colIndex] ? hrac.tipyData[colIndex].replace(/"/g, '').trim() : 'Nevyplněno';
                     const ziskaneBody = hrac.kontrolaData[colIndex] ? hrac.kontrolaData[colIndex].replace(/"/g, '').trim() : '0';
+                    const spravnaOdpoved = spravneOdpovediRow[colIndex] ? spravneOdpovediRow[colIndex].replace(/"/g, '').trim() : 'Zatím neznámá';
+                    
                     const ptsColor = parseInt(ziskaneBody) > 0 ? 'color: var(--accent-green);' : 'color: var(--text-muted);';
 
                     bonusesContainer.innerHTML += `
                         <div class="bonus-item">
                             <div class="bonus-text">
-                                <div class="b-question">${bonusQuestionsText[k]}</div>
+                                <div class="b-question">${bonusQuestionsText[k]} <span style="color: var(--accent-yellow); font-style: italic;">(${spravnaOdpoved})</span></div>
                                 <div class="b-answer">${tipOdpoved}</div>
                             </div>
                             <div class="b-pts" style="${ptsColor}">${ziskaneBody}</div>
