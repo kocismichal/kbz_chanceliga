@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Druhá liga - KBZ tipovačka</title>
+    </head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo-text">DRUHÁ LIGA - <span>KBZ TIPOVAČKA</span></div>
+        </header>
+        
+        <nav style="text-align: center; margin-bottom: 30px;">
+            <a href="index.html" style="margin: 0 15px; color: var(--text-muted);">Chance liga</a> 
+            <span style="color: var(--accent-blue);">Druhá liga</span>
+        </nav>
+
+        </div>
+
+    <script>
+        // Nové URL pro 2. ligu (output=csv)
+        const urlPrehled = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8xwUPtx_tkcu5fvjAtnsQIWHaJopVt6wgdGLu2qIk42xqr7GreVPUpprKf6IPIpqoJSMwoZa8xNu7/pub?gid=1446924552&single=true&output=csv';
+        const urlTipy = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8xwUPtx_tkcu5fvjAtnsQIWHaJopVt6wgdGLu2qIk42xqr7GreVPUpprKf6IPIpqoJSMwoZa8xNu7/pub?gid=0&single=true&output=csv';
+        const urlKontrola = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8xwUPtx_tkcu5fvjAtnsQIWHaJopVt6wgdGLu2qIk42xqr7GreVPUpprKf6IPIpqoJSMwoZa8xNu7/pub?gid=1129220254&single=true&output=csv';
+        const urlHotovo = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8xwUPtx_tkcu5fvjAtnsQIWHaJopVt6wgdGLu2qIk42xqr7GreVPUpprKf6IPIpqoJSMwoZa8xNu7/pub?gid=1661482320&single=true&output=csv';
+        const urlVyskyt = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8xwUPtx_tkcu5fvjAtnsQIWHaJopVt6wgdGLu2qIk42xqr7GreVPUpprKf6IPIpqoJSMwoZa8xNu7/pub?gid=236934267&single=true&output=csv';
+
+        // Mapování sloupců pro 2. ligu (indexy jsou 0-based, takže sloupec A=0, B=1...)
+        // AN=39, AO=40, AP=41, AQ=42, AR=43, AS=44
+        function zpracujVsechnaData(csvPrehled, csvTipy, csvKontrola, csvHotovo, csvVyskyt) {
+            // ... (stejný parsing jako u 1. ligy) ...
+            
+            // Mapování hráče:
+            // bodyUmisteni: AN(39), bodyBonus: AO(40), celkem: AP(41)
+            // poradiUmisteni: AQ(42), poradiBonus: AR(43), poradiCelkem: AS(44)
+            
+            // Pro střelce (řádek 52, tj. index 51):
+            // Nejlepší střelec (sloupec Z = 25)
+            // Počet gólů (sloupec AA = 26)
+            
+            // Uprav logiku uvnitř cyklu for:
+            /*
+            vsichniHraci.push({
+                bodyUmisteni: vycistiCislo(bunkyP[39]),
+                bodyBonus: vycistiCislo(bunkyP[40]),
+                celkem: vycistiCislo(bunkyP[41]),
+                poradiUmisteni: parseInt(bunkyP[42]) || 999,
+                poradiBonus: parseInt(bunkyP[43]) || 999,
+                poradiCelkem: parseInt(bunkyP[44]) || 999
+            });
+            */
+        }
+        
+        // Bonusové otázky (změnit texty podle 2. ligy):
+        const bonusQuestionsText = [
+            "Baráž postup V?", 
+            "Počet bodů mistra W?", 
+            "Rozdíl 1 a 2 X?", 
+            "Počet bodů sestupující Y?", 
+            "Nejlepší střelec Z:", 
+            "Počet gólů střelce AA?"
+        ];
+        
+        // ... zbytek skriptu zůstává identický ...
+    </script>
+</body>
+</html>
