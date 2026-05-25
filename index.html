@@ -140,7 +140,10 @@
             border-radius: 16px; width: 95%; max-width: 680px; max-height: 90vh; overflow-y: auto;
             position: relative; padding: 0;
             box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            scrollbar-width: thin; scrollbar-color: var(--accent-blue) var(--bg-card);
         }
+        .modal-card::-webkit-scrollbar { width: 6px; }
+        .modal-card::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 3px; }
         
         .close-btn {
             position: sticky; top: 15px; float: right; margin-right: 20px; z-index: 10;
@@ -159,6 +162,18 @@
         .modal-name { font-family: 'Oswald', sans-serif; font-size: 1.8rem; }
         
         .modal-content { padding: 0 30px 30px 30px; }
+
+        /* Systém bodování UI */
+        .scoring-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .scoring-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; }
+        .scoring-card h4 { color: var(--accent-blue); margin-bottom: 12px; font-family: 'Oswald', sans-serif; font-size: 1.1rem; text-transform: uppercase; }
+        .scoring-card ul { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--text-muted); }
+        .scoring-card li { margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;}
+        .scoring-card li strong { color: #fff; font-weight: 600; }
+        .scoring-multiplier { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); font-size: 0.85rem; color: var(--text-muted); }
+        .scoring-multiplier div { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .scoring-multiplier div span { color: var(--accent-yellow); font-weight: bold; }
+        @media (max-width: 600px) { .scoring-info { grid-template-columns: 1fr; } }
 
         .modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
         .modal-stat-box { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);}
@@ -194,7 +209,7 @@
         }
 
         /* Bonusové otázky */
-        .bonus-list { display: flex; flex-direction: column; gap: 10px; }
+        .bonus-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
         .bonus-item {
             background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px;
             padding: 12px 15px; display: flex; justify-content: space-between; align-items: center;
@@ -310,10 +325,40 @@
             
             <div class="modal-header">
                 <div class="modal-avatar" style="background: var(--accent-yellow); color: var(--bg-main);"><i class="fas fa-check"></i></div>
-                <div class="modal-name">Oficiální správné odpovědi</div>
+                <div class="modal-name">Správné odpovědi a systém bodování</div>
             </div>
             
             <div class="modal-content">
+                <div class="modal-subtitle">Systém bodování</div>
+                <div class="scoring-info">
+                    <div class="scoring-card">
+                        <h4>📊 Tipy na pořadí týmů</h4>
+                        <ul>
+                            <li><strong>Přesné místo:</strong> 10 bodů</li>
+                            <li><strong>Netrefené o 1 místo:</strong> 9 bodů</li>
+                            <li><strong>Netrefené o 2 místa:</strong> 8 bodů</li>
+                            <li><strong>Netrefené o 3 místa:</strong> 7 bodů</li>
+                        </ul>
+                        <div class="scoring-multiplier">
+                            <strong style="color: #fff; margin-bottom: 5px; display:block;">Bonusové násobky umístění:</strong>
+                            <div>15 až 16 trefených míst: <span>1.3x</span></div>
+                            <div>12 až 14 trefených míst: <span>1.2x</span></div>
+                            <div>8 až 11 trefených míst: <span>1.1x</span></div>
+                        </div>
+                    </div>
+                    <div class="scoring-card">
+                        <h4>🎯 Bonusové otázky</h4>
+                        <ul>
+                            <li><strong>Textové:</strong> 10 bodů <em>(tolerují se překlepy)</em></li>
+                            <li><strong>Číselné (přesně):</strong> 10 bodů</li>
+                            <li><strong>Číselné (o 1 vedle):</strong> 8 bodů</li>
+                            <li><strong>Číselné (o 2 vedle):</strong> 6 bodů</li>
+                            <li><strong>Číselné (o 3 vedle):</strong> 4 body</li>
+                            <li><strong>Číselné (o 4 vedle):</strong> 2 body</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="modal-subtitle">Aktuální oficiální pořadí týmů</div>
                 <div class="teams-grid-8x2" id="modalSpravneTeams"></div>
 
@@ -327,9 +372,7 @@
         const urlPrehled = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQV9zgAr6YDisVCJo-k3t9iusjzfA_WBchSObYJ8rAIve99NBzTlr6OD-ahb57CdM08PgmFqwRp02kQ/pub?gid=1446924552&single=true&output=csv';
         const urlTipy = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQV9zgAr6YDisVCJo-k3t9iusjzfA_WBchSObYJ8rAIve99NBzTlr6OD-ahb57CdM08PgmFqwRp02kQ/pub?gid=0&single=true&output=csv';
         const urlKontrola = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQV9zgAr6YDisVCJo-k3t9iusjzfA_WBchSObYJ8rAIve99NBzTlr6OD-ahb57CdM08PgmFqwRp02kQ/pub?gid=1129220254&single=true&output=csv';
-        
-        // !!! ZDE VLOŽ GID PRO LIST "Přehled HOTOVO" !!!
-        const urlHotovo = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQV9zgAr6YDisVCJo-k3t9iusjzfA_WBchSObYJ8rAIve99NBzTlr6OD-ahb57CdM08PgmFqwRp02kQ/pub?gid=ZDE_VLOZ_GID_LISTU_PREHLED_HOTOVO&single=true&output=csv';
+        const urlHotovo = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQV9zgAr6YDisVCJo-k3t9iusjzfA_WBchSObYJ8rAIve99NBzTlr6OD-ahb57CdM08PgmFqwRp02kQ/pub?gid=1661482320&single=true&output=csv';
 
         const teamLogos = {
             "Slavia Praha": "https://i.imgur.com/g1Zkhwg.png",
@@ -375,7 +418,6 @@
             return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
         }
 
-        // Vylepšená funkce s podporou nových obrázků podle řádků i jmen
         function getAvatarHTML(name, puvodniIndex) {
             const cleanName = name.toLowerCase();
             if (cleanName.includes("podroužek") || puvodniIndex === 2) {
@@ -589,7 +631,6 @@
             if (!e.target.closest('.search-container')) { document.getElementById('searchResults').style.display = 'none'; }
         });
 
-        // OTEVŘENÍ DETAILU OSOBY
         function otevriModal(hrac) {
             const avatarDiv = document.getElementById('modalMainAvatar');
             const cleanName = hrac.jmeno.toLowerCase();
@@ -656,7 +697,6 @@
             document.getElementById('playerModal').style.display = 'flex';
         }
 
-        // OTEVŘENÍ MODALU SPRÁVNÝCH ODPOVĚDÍ
         function otevriModalSpravne() {
             const teamsContainer = document.getElementById('modalSpravneTeams');
             const bonusesContainer = document.getElementById('modalSpravneBonuses');
@@ -665,7 +705,6 @@
             bonusesContainer.innerHTML = '';
 
             if (spravneOdpovediRow.length >= 20) {
-                // Týmy (E-T, indexy 4-19)
                 for (let j = 4; j <= 19; j++) {
                     const spravnyTym = spravneOdpovediRow[j] ? spravneOdpovediRow[j].replace(/"/g, '').trim() : '';
                     const logoUrl = teamLogos[spravnyTym] || 'https://i.imgur.com/8N4Jp62.png';
@@ -679,7 +718,6 @@
                     `;
                 }
                 
-                // Bonusové odpovědi (U-AG, indexy 20-32)
                 for (let k = 0; k < 13; k++) {
                     const colIndex = 20 + k;
                     const spravnaOdpoved = spravneOdpovediRow[colIndex] ? spravneOdpovediRow[colIndex].replace(/"/g, '').trim() : 'Zatím neznámá';
@@ -695,7 +733,7 @@
                     `;
                 }
             } else {
-                const errorMsg = '<span style="color:var(--text-muted); padding:20px; text-align:center; width:100%; display:block;">Adresa urlHotovo nebyla nalezena nebo chybí platné GID v kódu.</span>';
+                const errorMsg = '<span style="color:var(--text-muted); padding:20px; text-align:center; width:100%; display:block;">Odpovědi zatím nejsou vyplněny.</span>';
                 teamsContainer.innerHTML = errorMsg;
                 bonusesContainer.innerHTML = errorMsg;
             }
