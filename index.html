@@ -164,15 +164,12 @@
         .modal-content { padding: 0 30px 30px 30px; }
 
         /* Systém bodování UI */
-        .scoring-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-        .scoring-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; }
+        .scoring-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; align-items: start; }
+        .scoring-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; height: 100%;}
         .scoring-card h4 { color: var(--accent-blue); margin-bottom: 12px; font-family: 'Oswald', sans-serif; font-size: 1.1rem; text-transform: uppercase; }
         .scoring-card ul { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--text-muted); }
-        .scoring-card li { margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;}
+        .scoring-card li { margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;}
         .scoring-card li strong { color: #fff; font-weight: 600; }
-        .scoring-multiplier { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); font-size: 0.85rem; color: var(--text-muted); }
-        .scoring-multiplier div { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .scoring-multiplier div span { color: var(--accent-yellow); font-weight: bold; }
         @media (max-width: 600px) { .scoring-info { grid-template-columns: 1fr; } }
 
         .modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
@@ -184,7 +181,7 @@
 
         .modal-subtitle { font-family: 'Oswald', sans-serif; font-size: 1.2rem; color: var(--accent-blue); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;}
         
-        /* Nové rozvržení mřížky 8 a 8 bez nutnosti rolování */
+        /* Rozvržení mřížky 8 a 8 bez rolování */
         .teams-grid-8x2 {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -204,7 +201,7 @@
 
         @media (max-width: 620px) {
             .teams-grid-8x2 {
-                grid-template-columns: repeat(4, 1fr); /* Elegantní přeskládání 4x4 na mobilech */
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
@@ -325,7 +322,7 @@
             
             <div class="modal-header">
                 <div class="modal-avatar" style="background: var(--accent-yellow); color: var(--bg-main);"><i class="fas fa-check"></i></div>
-                <div class="modal-name">Správné odpovědi a systém bodování</div>
+                <div class="modal-name">Správné odpovědi a bodování</div>
             </div>
             
             <div class="modal-content">
@@ -333,24 +330,36 @@
                 <div class="scoring-info">
                     <div class="scoring-card">
                         <h4>📊 Tipy na pořadí týmů</h4>
-                        <ul>
-                            <li><strong>Přesné místo:</strong> 10 bodů</li>
-                            <li><strong>Netrefené o 1 místo:</strong> 9 bodů</li>
-                            <li><strong>Netrefené o 2 místa:</strong> 8 bodů</li>
-                            <li><strong>Netrefené o 3 místa:</strong> 7 bodů</li>
-                        </ul>
-                        <div class="scoring-multiplier">
-                            <strong style="color: #fff; margin-bottom: 5px; display:block;">Bonusové násobky umístění:</strong>
-                            <div>15 až 16 trefených míst: <span>1.3x</span></div>
-                            <div>12 až 14 trefených míst: <span>1.2x</span></div>
-                            <div>8 až 11 trefených míst: <span>1.1x</span></div>
+                        <div style="display: flex; gap: 15px; justify-content: space-between;">
+                            <div style="flex: 1;">
+                                <ul>
+                                    <li><strong>Přesně:</strong> 10 b.</li>
+                                    <li><strong>o 1 místo:</strong> 9 b.</li>
+                                    <li><strong>o 2 místa:</strong> 8 b.</li>
+                                    <li><strong>o 3 místa:</strong> 7 b.</li>
+                                    <li><strong>o 4 místa:</strong> 6 b.</li>
+                                    <li><strong>o 5 míst:</strong> 5 b.</li>
+                                    <li><strong>o 6 míst:</strong> 4 b.</li>
+                                    <li><strong>o 7 míst:</strong> 3 b.</li>
+                                    <li><strong>o 8 míst:</strong> 2 b.</li>
+                                    <li><strong>o 9 míst:</strong> 1 b.</li>
+                                </ul>
+                            </div>
+                            <div style="flex: 1; border-left: 1px dashed var(--border-color); padding-left: 15px;">
+                                <strong style="color: #fff; margin-bottom: 8px; display:block; font-size: 0.85rem;">Bonusové násobky:</strong>
+                                <ul>
+                                    <li>15 až 16 přesně:<br><span style="color:var(--accent-yellow); font-weight:bold;">1.3x</span></li>
+                                    <li style="margin-top: 5px;">12 až 14 přesně:<br><span style="color:var(--accent-yellow); font-weight:bold;">1.2x</span></li>
+                                    <li style="margin-top: 5px;">8 až 11 přesně:<br><span style="color:var(--accent-yellow); font-weight:bold;">1.1x</span></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     <div class="scoring-card">
                         <h4>🎯 Bonusové otázky</h4>
                         <ul>
-                            <li><strong>Textové:</strong> 10 bodů <em>(tolerují se překlepy)</em></li>
-                            <li><strong>Číselné (přesně):</strong> 10 bodů</li>
+                            <li><strong>Textové:</strong> 10 bodů <br><em style="color:var(--text-muted);">(s tolerancí 1 překlepu)</em></li>
+                            <li style="margin-top:10px;"><strong>Číselné (přesně):</strong> 10 bodů</li>
                             <li><strong>Číselné (o 1 vedle):</strong> 8 bodů</li>
                             <li><strong>Číselné (o 2 vedle):</strong> 6 bodů</li>
                             <li><strong>Číselné (o 3 vedle):</strong> 4 body</li>
@@ -480,7 +489,6 @@
             const radkyTipy = csvTipy.split('\n');
             const radkyKontrola = csvKontrola.split('\n');
             
-            // Načtení správných odpovědí (2. řádek listu Přehled HOTOVO)
             if (csvHotovo) {
                 const radkyHotovo = csvHotovo.split('\n');
                 if (radkyHotovo.length > 1) {
@@ -713,7 +721,6 @@
                         <div class="team-col">
                             <span class="t-pos">${j - 3}.</span>
                             <img src="${logoUrl}" alt="${spravnyTym}" class="t-logo" title="${spravnyTym}">
-                            <span class="t-pts" style="color: var(--accent-yellow); font-size:0.8rem; font-weight:bold;">Klub</span>
                         </div>
                     `;
                 }
@@ -721,6 +728,10 @@
                 for (let k = 0; k < 13; k++) {
                     const colIndex = 20 + k;
                     const spravnaOdpoved = spravneOdpovediRow[colIndex] ? spravneOdpovediRow[colIndex].replace(/"/g, '').trim() : 'Zatím neznámá';
+                    
+                    const rightIcon = teamLogos[spravnaOdpoved] 
+                        ? `<img src="${teamLogos[spravnaOdpoved]}" style="width:32px; height:32px; object-fit:contain;" alt="${spravnaOdpoved}">` 
+                        : ``;
 
                     bonusesContainer.innerHTML += `
                         <div class="bonus-item" style="border-color: rgba(255,215,0,0.2);">
@@ -728,7 +739,7 @@
                                 <div class="b-question">${bonusQuestionsText[k]}</div>
                                 <div class="b-answer" style="color: var(--accent-yellow);">${spravnaOdpoved}</div>
                             </div>
-                            <div class="b-pts"><i class="fas fa-check-circle" style="color: var(--accent-yellow);"></i></div>
+                            <div class="b-pts" style="display:flex; align-items:center;">${rightIcon}</div>
                         </div>
                     `;
                 }
