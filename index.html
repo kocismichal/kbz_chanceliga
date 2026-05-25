@@ -746,7 +746,7 @@
 
                     div.innerHTML = `
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <div style="width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:bold; overflow:hidden; color:#fff; ${bgStyle}">
+                            <div style="width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:bold; overflow:hidden; color:#fff; flex-shrink:0; ${bgStyle}">
                                 ${getAvatarHTML(hrac.jmeno, hrac.puvodniIndex)}
                             </div>
                             <span><strong>${hrac.jmeno}</strong> ${ziskejLogoKlubuHTML(hrac.oblubenyKlub)}</span>
@@ -928,14 +928,12 @@
             document.getElementById('sekce-prehled-bonusy').style.display = sekce === 'bonusy' ? 'block' : 'none';
         }
 
-        // --- PŘEHLED VŠECH TIPŮ (Z VyskytovaTabulka) ---
+        // --- PŘEHLED VŠECH TIPŮ ---
         function otevriModalPrehled() {
             if (dataVyskytParsed.length === 0) {
                 alert("Data pro přehled tipů se nepodařilo načíst.");
                 return;
             }
-            
-            // Defaultní zobrazení při otevření
             zmenPrehledSekci('umisteni');
             vykresliPrehledMatrix('cisla');
             vykresliPrehledBonusy();
@@ -946,24 +944,22 @@
         }
 
         function vykresliPrehledMatrix(mod) {
-            // mod = 'cisla' (A1:Q17) nebo 'procenta' (S1:AI17)
             const isProc = mod === 'procenta';
             
             document.getElementById('btn-prehled-cisla').classList.toggle('active', !isProc);
             document.getElementById('btn-prehled-procenta').classList.toggle('active', isProc);
             
-            let html = `<table><thead><tr><th>Tým / Pozice</th>`;
+            let html = `<table><thead><tr><th>Tým</th>`;
             for(let i=1; i<=16; i++) html += `<th>${i}.</th>`;
             html += `</tr></thead><tbody>`;
 
-            // Řádky 1 až 16
+            // Prvních 16 řádků (index 1 až 16) obsahuje data matice
             for (let r = 1; r <= 16; r++) {
                 const rowData = dataVyskytParsed[r];
                 if(!rowData) continue;
                 const tym = rowData[0];
                 const logo = teamLogos[tym] || 'https://i.imgur.com/8N4Jp62.png';
                 
-                // Místo textu ukazujeme jen logo týmu
                 html += `<tr><td style="position:sticky;left:0;background:#111722;z-index:20;text-align:center;"><img src="${logo}" style="width:28px;height:28px;object-fit:contain;" title="${tym}"></td>`;
                 
                 for(let c = 1; c <= 16; c++) {
@@ -978,25 +974,32 @@
         }
 
         function vykresliPrehledBonusy() {
-            // Sloupce odpovídající konkrétním otázkám (B až H = index 1 až 7)
             const bonusColsMapping = [
-                { col: 1, title: "Kdo ovládne základní část soutěže?" },
-                { col: 2, title: "Který tým obdrží nejvíce žlutých karet?" },
-                { col: 3, title: "Který tým obdrží nejvíce červených karet?" },
-                { col: 4, title: "Který tým bude mít největší úspěšnost přihrávek?" },
-                { col: 5, title: "Který tým bude mít na svém kontě nejvíce faulů?" },
-                { col: 6, title: "Který tým bude v nejvíce ofsajdech?" },
-                { col: 7, title: "Který tým během zápasů získá nejvíce míčů od soupeře?" }
+                { col: 1, title: "Kdo ovládne základní část soutěže?" }, // B
+                { col: 2, title: "Který tým obdrží nejvíce žlutých karet?" }, // C
+                { col: 3, title: "Který tým obdrží nejvíce červených karet?" }, // D
+                { col: 4, title: "Který tým bude mít největší úspěšnost přihrávek?" }, // E
+                { col: 5, title: "Který tým bude mít na svém kontě nejvíce faulů?" }, // F
+                { col: 6, title: "Který tým bude v nejvíce ofsajdech?" }, // G
+                { col: 7, title: "Který tým během zápasů získá nejvíce míčů od soupeře?" } // H
             ];
+
+            // 100% BULLETPROOF VYHLEDÁNÍ: Najdeme všechny řádky, kde v 1. sloupci je platný tým, a vezmeme druhou šestnáctku
+            let vsechnyTymoveRadky = [];
+            dataVyskytParsed.forEach((row, index) => {
+                if (row && row[0] && teamLogos[row[0].trim()]) {
+                    vsechnyTymoveRadky.push(row);
+                }
+            });
+            // Indexy 16 až 31 reprezentují řádky 33 až 48
+            let bonusTymoveRadky = vsechnyTymoveRadky.slice(16, 32);
 
             let html = '';
             bonusColsMapping.forEach(bq => {
                 html += `<div class="modal-subtitle" style="margin-top: 30px;">${bq.title}</div><div class="teams-grid-8x2">`;
-                // Data týmů jsou v řádcích 33 až 48 (indexy 32 až 47)
-                for(let r = 32; r <= 47; r++) {
-                    const rowData = dataVyskytParsed[r];
-                    if(!rowData || !rowData[0]) continue;
-                    const tym = rowData[0];
+                
+                bonusTymoveRadky.forEach(rowData => {
+                    const tym = rowData[0].trim();
                     const val = rowData[bq.col];
                     const logo = teamLogos[tym] || 'https://i.imgur.com/8N4Jp62.png';
                     
@@ -1004,27 +1007,26 @@
                                 <img src="${logo}" class="t-logo" title="${tym}">
                                 <span class="t-pts" style="color:var(--accent-yellow); font-size:1.1rem;">${val || '0'}</span>
                              </div>`;
-                }
+                });
                 html += `</div>`;
             });
             document.getElementById('prehled-bonusy').innerHTML = html;
         }
 
         function vykresliPrehledStrelci() {
-            // Střelci jsou v B52 a níže, což je sloupec s indexem 1 (B), od řádku 52 (index 51)
             let strelci = [];
-            for(let r = 51; r <= 60; r++) {
+            // Sloupec S je index 18. Čteme čistě od řádku 52 (index 51) do konce tabulky
+            for(let r = 51; r < dataVyskytParsed.length; r++) {
                 const rowData = dataVyskytParsed[r];
-                if(rowData && rowData[1] && rowData[1].trim() !== '') {
-                    strelci.push(rowData[1].trim());
+                if(rowData && rowData[18] && rowData[18].trim() !== '') {
+                    strelci.push(rowData[18].trim());
                 }
             }
             
             let html = '<div class="bonus-list">';
-            strelci.forEach((s, idx) => {
+            strelci.slice(0, 10).forEach((s, idx) => {
                 let jmeno = s;
                 let pocet = "";
-                // Extrahuje "Vasil Kušej" a "408" ze zápisu "Vasil Kušej (408)"
                 const match = s.match(/(.*?)\((.*?)\)/);
                 if (match) {
                     jmeno = match[1].trim();
