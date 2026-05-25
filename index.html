@@ -3,168 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zimní příprava - Tipovačka</title>
+    <title>Chance liga - KBZ tipovačka</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #00ff88;
-            --bg-dark: rgba(20, 20, 20, 0.85);
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            --bg-main: #0b111e;
+            --bg-card: #161d2b;
+            --border-color: #232b38;
+            --text-main: #ffffff;
+            --text-muted: #8b95a5;
+            --accent-blue: #0088ff;
+            --accent-yellow: #ffd700;
         }
-        
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            margin: 0;
-            padding: 20px;
-            color: #ffffff;
-            background-color: #111;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 50px;
             background-image: url('pozadi.jpeg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: var(--bg-dark);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            border: 1px solid var(--glass-border);
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; position: relative; }
+
+        /* Hlavička */
+        header { text-align: center; margin-top: 40px; margin-bottom: 30px; }
+        .logo-text { font-family: 'Oswald', sans-serif; font-size: 2.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .logo-text span { color: var(--accent-blue); }
+        
+        /* Vyhledávání s našeptávačem */
+        .search-container { position: relative; max-width: 600px; margin: 0 auto 40px auto; z-index: 100; }
+        .search-input {
+            width: 100%; padding: 15px 20px 15px 45px;
+            background-color: rgba(22, 29, 43, 0.9); border: 1px solid var(--accent-blue);
+            border-radius: 30px; color: var(--text-main); font-size: 1.1rem;
+            box-shadow: 0 5px 20px rgba(0, 136, 255, 0.2);
+        }
+        .search-input:focus { outline: none; background-color: #1a2333; }
+        .search-container i { position: absolute; left: 18px; top: 17px; color: var(--text-muted); font-size: 1.2rem; }
+        
+        .autocomplete-results {
+            position: absolute; top: 60px; left: 0; right: 0;
+            background-color: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 12px; max-height: 300px; overflow-y: auto; display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .autocomplete-item {
+            padding: 12px 20px; cursor: pointer; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .autocomplete-item:hover { background-color: rgba(255,255,255,0.05); }
+
+        /* Sekce nadpisy */
+        .section-title { 
+            font-family: 'Oswald', sans-serif; font-size: 1.5rem; color: var(--text-muted); 
+            border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; 
         }
 
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
-            font-size: 2.5em;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            text-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        /* Tipy Zajíců (Karty) */
+        .zajici-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 50px; }
+        .zajic-card { 
+            background: linear-gradient(145deg, var(--bg-card), #101520); border: 1px solid var(--border-color); 
+            border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: transform 0.2s;
         }
-
-        /* Styl pro vyhledávací pole */
-        .search-container {
-            margin-bottom: 20px;
-            text-align: center;
+        .zajic-card:hover { transform: translateY(-5px); border-color: var(--accent-yellow); }
+        .zajic-avatar {
+            width: 70px; height: 70px; margin: 0 auto 15px auto; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), #00d2ff);
+            display: flex; align-items: center; justify-content: center; font-family: 'Oswald'; font-size: 1.8rem; font-weight: bold;
         }
+        .zajic-name { font-family: 'Oswald', sans-serif; font-size: 1.3rem; margin-bottom: 10px; }
+        .zajic-points { font-size: 1.1rem; color: var(--accent-yellow); font-weight: bold; }
 
-        #searchInput {
-            width: 100%;
-            max-width: 400px;
-            padding: 12px 20px;
-            font-size: 1.1em;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--primary-color);
-            border-radius: 30px;
-            outline: none;
-            transition: all 0.3s ease;
+        /* Záložky pro žebříčky */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn {
+            background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted);
+            padding: 12px 24px; border-radius: 30px; cursor: pointer; font-family: 'Oswald', sans-serif;
+            font-size: 1rem; text-transform: uppercase; transition: all 0.3s;
         }
+        .tab-btn.active { background-color: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+        .tab-btn:hover:not(.active) { background-color: rgba(255,255,255,0.05); }
 
-        #searchInput::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+        /* Tabulka */
+        .table-container { background-color: rgba(22, 29, 43, 0.9); border: 1px solid var(--border-color); border-radius: 12px; overflow-x: auto; margin-bottom: 50px;}
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 15px 20px; border-bottom: 1px solid var(--border-color); }
+        th { font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; background: rgba(0,0,0,0.3); }
+        tr { cursor: pointer; transition: background 0.2s; }
+        tr:hover { background-color: rgba(255,255,255,0.05); }
+        .rank-col { font-family: 'Oswald', sans-serif; font-size: 1.2rem; width: 80px; text-align: center; }
+        .points-col { font-family: 'Oswald', sans-serif; font-size: 1.1rem; font-weight: bold; }
+
+        /* Vyskakovací okno (Modal) pro detail hráče */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
         }
-
-        #searchInput:focus {
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
-            background: rgba(0, 0, 0, 0.8);
+        .modal-card {
+            background-color: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 16px; width: 90%; max-width: 500px; padding: 30px; position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
         }
-
-        .table-responsive {
-            overflow-x: auto;
+        .close-btn {
+            position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--text-muted);
+            cursor: pointer; transition: color 0.2s;
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+        .close-btn:hover { color: #fff; }
+        
+        .modal-header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+        .modal-avatar {
+            width: 80px; height: 80px; margin: 0 auto 15px auto; border-radius: 50%;
+            background: linear-gradient(135deg, #ff4d29, #ffd700);
+            display: flex; align-items: center; justify-content: center; font-family: 'Oswald'; font-size: 2rem; color: #fff;
         }
+        .modal-name { font-family: 'Oswald', sans-serif; font-size: 1.8rem; }
+        
+        .modal-stats { display: flex; flex-direction: column; gap: 15px; }
+        .modal-stat-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 15px 20px; border-radius: 8px; }
+        .modal-stat-label { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .modal-stat-val { font-family: 'Oswald', sans-serif; font-size: 1.3rem; }
+        .val-total { color: var(--accent-yellow); font-size: 1.5rem; }
 
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--glass);
-        }
-
-        th {
-            background-color: rgba(0, 255, 136, 0.15);
-            color: var(--primary-color);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: sticky;
-            top: 0;
-        }
-
-        tr:hover td {
-            background-color: rgba(255, 255, 255, 0.08);
-            transition: background 0.3s ease;
-        }
-
-        .rank-1 { color: #ffd700; font-weight: 900; font-size: 1.3em; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-        .rank-2 { color: #c0c0c0; font-weight: bold; font-size: 1.2em; }
-        .rank-3 { color: #cd7f32; font-weight: bold; font-size: 1.2em; }
-
-        .loader {
-            text-align: center;
-            padding: 40px;
-            color: var(--primary-color);
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-
-        .points-total {
-            color: var(--primary-color);
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 20px;
-            color: #ffaa00;
-            font-style: italic;
-        }
+        .loader { text-align: center; padding: 40px; color: var(--text-muted); }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>🏆 Tipovačka - Top 100</h1>
-        
+        <header>
+            <div class="logo-text">CHANCE LIGA - <span>KBZ TIPOVAČKA</span></div>
+        </header>
+
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="🔍 Vyhledej jméno fanouška..." onkeyup="filtrujTabulku()">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Napiš jméno a hned uvidíš výsledek..." oninput="hledejHrace()">
+            <div class="autocomplete-results" id="searchResults"></div>
         </div>
+
+        <h2 class="section-title">🎙️ Tipy Zajíců</h2>
+        <div class="zajici-grid" id="zajici-container">
+            <div class="loader">Načítám Zajíce...</div>
+        </div>
+
+        <h2 class="section-title" style="margin-top: 40px;">🏆 Žebříčky</h2>
         
-        <div class="table-responsive">
-            <table id="leaderboard">
+        <div class="tabs">
+            <button class="tab-btn" onclick="zmenZalozku('umisteni')" id="tab-umisteni">Body za pořadí</button>
+            <button class="tab-btn" onclick="zmenZalozku('bonusy')" id="tab-bonusy">Body za bonusové otázky</button>
+            <button class="tab-btn active" onclick="zmenZalozku('celkem')" id="tab-celkem">Celkové pořadí</button>
+        </div>
+
+        <div class="table-container">
+            <table>
                 <thead>
                     <tr>
-                        <th>Pořadí</th>
+                        <th style="text-align:center;">Pořadí</th>
                         <th>Jméno fanouška</th>
-                        <th>Umístění (b.)</th>
-                        <th>Bonusy (b.)</th>
-                        <th>Celkem bodů</th>
+                        <th style="text-align:right;">Získané body</th>
                     </tr>
                 </thead>
                 <tbody id="tabulka-telo">
-                    <tr>
-                        <td colspan="5" class="loader">Načítám aktuální výsledky z tabulky...</td>
-                    </tr>
+                    <tr><td colspan="3" class="loader">Načítám data z tabulky...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
+    <div class="modal-overlay" id="playerModal" onclick="zavriModal(event)">
+        <div class="modal-card">
+            <i class="fas fa-times close-btn" onclick="document.getElementById('playerModal').style.display='none'"></i>
+            <div class="modal-header">
+                <div class="modal-avatar" id="modalInitials">--</div>
+                <div class="modal-name" id="modalName">Jméno Hráče</div>
+            </div>
+            <div class="modal-stats">
+                <div class="modal-stat-row">
+                    <span class="modal-stat-label">Umístění (pořadí)</span>
+                    <span class="modal-stat-val" id="modalRankUmisteni">-</span>
+                </div>
+                <div class="modal-stat-row">
+                    <span class="modal-stat-label">Body za pořadí</span>
+                    <span class="modal-stat-val" id="modalPtsUmisteni">-</span>
+                </div>
+                <div class="modal-stat-row">
+                    <span class="modal-stat-label">Bonusy (pořadí)</span>
+                    <span class="modal-stat-val" id="modalRankBonus">-</span>
+                </div>
+                <div class="modal-stat-row">
+                    <span class="modal-stat-label">Body za bonusy</span>
+                    <span class="modal-stat-val" id="modalPtsBonus">-</span>
+                </div>
+                <div class="modal-stat-row" style="background: rgba(0, 136, 255, 0.1); border: 1px solid rgba(0, 136, 255, 0.3);">
+                    <span class="modal-stat-label" style="color: var(--accent-blue); font-weight:bold;">Celkové pořadí</span>
+                    <span class="modal-stat-val val-total" id="modalRankTotal">-</span>
+                </div>
+                <div class="modal-stat-row" style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3);">
+                    <span class="modal-stat-label" style="color: var(--accent-yellow); font-weight:bold;">Celkem bodů</span>
+                    <span class="modal-stat-val val-total" id="modalPtsTotal">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // SEM PŘIJDE ODKAZ NA TVÁ DATA Z GOOGLE SHEETS
         const dataUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQV9zgAr6YDisVCJo-k3t9iusjzfA_WBchSObYJ8rAIve99NBzTlr6OD-ahb57CdM08PgmFqwRp02kQ/pub?gid=1446924552&single=true&output=csv';
         
-        // Sem si uložíme všechny načtené hráče pro rychlé filtrování
         let vsichniHraci = [];
+        let aktivniZalozka = 'celkem';
+
+        function getInitials(name) {
+            const parts = name.trim().split(' ');
+            return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
+        }
 
         async function nactiData() {
             try {
@@ -172,9 +231,8 @@
                 const data = await response.text();
                 zpracujData(data);
             } catch (error) {
-                console.error('Chyba při načítání:', error);
-                document.getElementById('tabulka-telo').innerHTML = 
-                    '<tr><td colspan="5" style="text-align:center; color:#ff4444;">Nepodařilo se načíst data z tabulky. Zkontroluj propojení.</td></tr>';
+                console.error('Chyba:', error);
+                document.getElementById('tabulka-telo').innerHTML = '<tr><td colspan="3" class="loader">Chyba při načítání dat.</td></tr>';
             }
         }
 
@@ -182,76 +240,181 @@
             const radky = csvText.split('\n');
             vsichniHraci = [];
 
-            // Přečteme data z listu "Přehled fans" od řádku 2
+            // Začínáme od řádku 1 (protože řádek 0 je hlavička tabulky)
             for (let i = 1; i < radky.length; i++) {
                 if (!radky[i].trim()) continue;
                 
-                const bunky = radky[i].split(',');
+                // Oprava pro CSV: někdy se čísla formátují s čárkou jako desetinnou. Musíme parsovat chytře.
+                // Vzhledem k tomu, že používáš getValues() ze Sheets, může být CSV odděleno čárkami a texty v uvozovkách.
+                // Pro zjednodušení (pokud tam nejsou jména s čárkou):
+                const bunky = radky[i].split(','); 
                 
                 if(bunky.length >= 45) {
-                    const jmeno = bunky[2].replace(/"/g, '').trim(); // Sloupec C
-                    const celkem = Number(bunky[41]) || 0; // Sloupec AP
+                    const jmeno = bunky[2].replace(/"/g, '').trim(); 
+                    const celkemPts = parseFloat(bunky[41].replace(/"/g, '')) || 0;
                     
-                    if (jmeno === "" || (celkem === 0 && jmeno === "")) continue;
+                    if (jmeno === "" || (celkemPts === 0 && jmeno === "")) continue;
 
                     vsichniHraci.push({
+                        puvodniIndex: i, // Zapamatujeme si původní řádek z Google tabulky (kde header=0, 1. člověk=1)
                         jmeno: jmeno,
-                        bodyUmisteni: Number(bunky[39]) || 0, // Sloupec AN
-                        bodyBonus: Number(bunky[40]) || 0,    // Sloupec AO
-                        celkem: celkem,
-                        poradi: Number(bunky[44]) || 999      // Sloupec AS
+                        bodyUmisteni: parseFloat(bunky[39].replace(/"/g, '')) || 0,
+                        bodyBonus: parseFloat(bunky[40].replace(/"/g, '')) || 0,
+                        celkem: celkemPts,
+                        poradiUmisteni: parseInt(bunky[42].replace(/"/g, '')) || 999, 
+                        poradiBonus: parseInt(bunky[43].replace(/"/g, '')) || 999,    
+                        poradiCelkem: parseInt(bunky[44].replace(/"/g, '')) || 999          
                     });
                 }
             }
 
-            // Seřadíme pole podle celkového pořadí a vezmeme TOP 100
-            vsichniHraci.sort((a, b) => a.poradi - b.poradi);
-            vsichniHraci = vsichniHraci.slice(0, 100);
-
-            // Prvotní vykreslení
-            vykresliTabulku(vsichniHraci);
+            vykresliZajice();
+            vykresliTabulku();
         }
 
-        function vykresliTabulku(dataKPobrazeni) {
-            const tbody = document.getElementById('tabulka-telo');
-            tbody.innerHTML = '';
+        function vykresliZajice() {
+            const container = document.getElementById('zajici-container');
+            container.innerHTML = '';
+            
+            // Řádky v tabulce jsou 3, 5, 6, 7 (což při indexování kde 1. řádek dat je index 1 znamená indexy 2, 4, 5, 6)
+            // Abysme se vyhnuli chybě s indexy, raději je najdeme přímo v poli podle jejich `puvodniIndex`.
+            const hledaneIndexy = [2, 4, 5, 6]; 
+            const zajici = vsichniHraci.filter(h => hledaneIndexy.includes(h.puvodniIndex));
 
-            if (dataKPobrazeni.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="no-results">Nenalezen žádný fanoušek s tímto jménem.</td></tr>';
+            if(zajici.length === 0) {
+                container.innerHTML = '<div class="loader">Zatím nebyly nalezeny data pro Zajíce (řádky 3, 5, 6, 7).</div>';
                 return;
             }
 
-            dataKPobrazeni.forEach(hrac => {
+            zajici.forEach(zajic => {
+                const card = document.createElement('div');
+                card.className = 'zajic-card';
+                card.onclick = () => otevriModal(zajic);
+                card.innerHTML = `
+                    <div class="zajic-avatar">${getInitials(zajic.jmeno)}</div>
+                    <div class="zajic-name">${zajic.jmeno}</div>
+                    <div class="zajic-points">${zajic.celkem} bodů</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">Celkově ${zajic.poradiCelkem}. místo</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function zmenZalozku(tabName) {
+            aktivniZalozka = tabName;
+            
+            // Přepnutí třídy "active" u tlačítek
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            vykresliTabulku();
+        }
+
+        function vykresliTabulku() {
+            const tbody = document.getElementById('tabulka-telo');
+            tbody.innerHTML = '';
+
+            // Vytvoříme kopii pole pro seřazení podle aktivní záložky
+            let data = [...vsichniHraci];
+
+            if (aktivniZalozka === 'umisteni') {
+                data.sort((a, b) => a.poradiUmisteni - b.poradiUmisteni);
+            } else if (aktivniZalozka === 'bonusy') {
+                data.sort((a, b) => a.poradiBonus - b.poradiBonus);
+            } else {
+                data.sort((a, b) => a.poradiCelkem - b.poradiCelkem);
+            }
+
+            data.forEach(hrac => {
                 const tr = document.createElement('tr');
-                
-                let rankClass = '';
-                if (hrac.poradi === 1) rankClass = 'rank-1';
-                else if (hrac.poradi === 2) rankClass = 'rank-2';
-                else if (hrac.poradi === 3) rankClass = 'rank-3';
+                tr.onclick = () => otevriModal(hrac); // Po kliknutí otevře detail
+
+                let poradi = 0;
+                let bodyZobrazeni = 0;
+
+                if (aktivniZalozka === 'umisteni') {
+                    poradi = hrac.poradiUmisteni; bodyZobrazeni = hrac.bodyUmisteni;
+                } else if (aktivniZalozka === 'bonusy') {
+                    poradi = hrac.poradiBonus; bodyZobrazeni = hrac.bodyBonus;
+                } else {
+                    poradi = hrac.poradiCelkem; bodyZobrazeni = hrac.celkem;
+                }
+
+                let colorClass = poradi <= 3 ? 'color: var(--accent-yellow);' : '';
 
                 tr.innerHTML = `
-                    <td class="${rankClass}">${hrac.poradi}.</td>
+                    <td class="rank-col" style="${colorClass}">${poradi}.</td>
                     <td style="font-weight: 600;">${hrac.jmeno}</td>
-                    <td>${hrac.bodyUmisteni}</td>
-                    <td>${hrac.bodyBonus}</td>
-                    <td class="points-total">${hrac.celkem}</td>
+                    <td class="points-col" style="text-align:right;">${bodyZobrazeni}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function filtrujTabulku() {
-            const hledanyText = document.getElementById('searchInput').value.toLowerCase();
-            
-            // Vyfiltrujeme hráče, jejichž jméno obsahuje hledaný text
-            const vyfiltrovaniHraci = vsichniHraci.filter(hrac => 
-                hrac.jmeno.toLowerCase().includes(hledanyText)
-            );
-            
-            vykresliTabulku(vyfiltrovaniHraci);
+        /* --- Vyhledávání a našeptávač --- */
+        function hledejHrace() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const resultBox = document.getElementById('searchResults');
+            resultBox.innerHTML = '';
+
+            if (input.length < 2) {
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            const shody = vsichniHraci.filter(h => h.jmeno.toLowerCase().includes(input));
+
+            if (shody.length > 0) {
+                resultBox.style.display = 'block';
+                shody.forEach(hrac => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.innerHTML = `<span><strong>${hrac.jmeno}</strong></span> <span style="color:var(--accent-yellow); font-size:0.9rem;">${hrac.celkem} b.</span>`;
+                    div.onclick = () => {
+                        document.getElementById('searchInput').value = '';
+                        resultBox.style.display = 'none';
+                        otevriModal(hrac);
+                    };
+                    resultBox.appendChild(div);
+                });
+            } else {
+                resultBox.style.display = 'block';
+                resultBox.innerHTML = '<div class="autocomplete-item" style="color:var(--text-muted); cursor:default;">Nikdo nenalezen</div>';
+            }
         }
 
-        // Spustit načítání hned po otevření webu
+        // Zavření našeptávače při kliknutí mimo
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                document.getElementById('searchResults').style.display = 'none';
+            }
+        });
+
+        /* --- Karta hráče (Modal) --- */
+        function otevriModal(hrac) {
+            document.getElementById('modalInitials').innerText = getInitials(hrac.jmeno);
+            document.getElementById('modalName').innerText = hrac.jmeno;
+            
+            document.getElementById('modalRankUmisteni').innerText = `${hrac.poradiUmisteni}. místo`;
+            document.getElementById('modalPtsUmisteni').innerText = hrac.bodyUmisteni;
+            
+            document.getElementById('modalRankBonus').innerText = `${hrac.poradiBonus}. místo`;
+            document.getElementById('modalPtsBonus').innerText = hrac.bodyBonus;
+            
+            document.getElementById('modalRankTotal').innerText = `${hrac.poradiCelkem}. místo`;
+            document.getElementById('modalPtsTotal').innerText = hrac.celkem;
+
+            document.getElementById('playerModal').style.display = 'flex';
+        }
+
+        function zavriModal(event) {
+            // Zavře se pouze při kliknutí na tmavé pozadí mimo kartu
+            if (event.target.id === 'playerModal') {
+                document.getElementById('playerModal').style.display = 'none';
+            }
+        }
+
+        // Spustit načítání
         document.addEventListener('DOMContentLoaded', nactiData);
     </script>
 </body>
