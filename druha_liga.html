@@ -446,7 +446,7 @@
         const urlHotovo = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8xwUPtx_tkcu5fvjAtnsQIWHaJopVt6wgdGLu2qIk42xqr7GreVPUpprKf6IPIpqoJSMwoZa8xNu7/pub?gid=1661482320&single=true&output=csv';
         const urlVyskyt = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8xwUPtx_tkcu5fvjAtnsQIWHaJopVt6wgdGLu2qIk42xqr7GreVPUpprKf6IPIpqoJSMwoZa8xNu7/pub?gid=236934267&single=true&output=csv';
 
-        // Slovník log (Pokud pro 2. ligu nemáš specifická loga, načte se text nebo placeholder)
+        // Slovník log pro obě ligy
         const teamLogos = {
             "Slavia Praha": "https://i.imgur.com/g1Zkhwg.png",
             "Sparta Praha": "https://i.imgur.com/NlyfFAC.png",
@@ -463,8 +463,24 @@
             "Pardubice": "https://i.imgur.com/3ZjvyQX.png",
             "Hradec Králové": "https://i.imgur.com/iyfKeMv.png",
             "Karviná": "https://i.imgur.com/j7hx1cA.png",
-            "Zlín": "https://i.imgur.com/7EseGiq.png"
-            // Sem případně doplň url na obrázky týmů 2. ligy (např. Zbrojovka, Vyškov...)
+            "Zlín": "https://i.imgur.com/7EseGiq.png",
+            "Slavia Praha B": "https://i.imgur.com/g1Zkhwg.png",
+            "Sparta Praha B": "https://i.imgur.com/NlyfFAC.png",
+            "Baník Ostrava B": "https://i.imgur.com/fhj9qlu.png",
+            "Chrudim": "https://i.imgur.com/GaaC0ox.png",
+            "Vyškov": "https://i.imgur.com/2gWNEbi.png",
+            "Příbram": "https://i.imgur.com/W5HbNQn.png",
+            "Táborsko": "https://i.imgur.com/R3QUiqz.png",
+            "Vlašim": "https://i.imgur.com/RCmUHo8.png",
+            "Zbrojovka Brno": "https://i.imgur.com/vJnfcFS.png",
+            "Artis Brno": "https://i.imgur.com/6hcOo7w.png",
+            "Viktoria Žižkov": "https://i.imgur.com/iIke5cO.png",
+            "Jihlava": "https://i.imgur.com/39RJLEC.png",
+            "Prostějov": "https://i.imgur.com/9AvvE6n.png",
+            "Opava": "https://i.imgur.com/Jn95z2w.png",
+            "Kroměříž": "https://i.imgur.com/s637GEc.png",
+            "Ústí nad Labem": "https://i.imgur.com/Ep5p3Xb.png",
+            "České Budějovice": "https://i.imgur.com/yUpY8bX.png"
         };
 
         // Texty bonusových otázek upraveny na 6 otázek pro 2. ligu
@@ -501,19 +517,20 @@
             return '';
         }
 
+        // Noví Zajíci pro 2. ligu a jejich avataři
         function getAvatarHTML(name, puvodniIndex) {
             const cleanName = name.toLowerCase();
-            if (cleanName.includes("podroužek") || puvodniIndex === 2) {
+            if (cleanName.includes("podroužek") || puvodniIndex === 1) { // Řádek 2 (index 1)
                 return '<img src="podry.png" alt="Jan Podroužek" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">';
             }
-            if (cleanName.includes("folpi") || puvodniIndex === 4) {
-                return '<img src="folpi.png" alt="folpi" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">';
-            }
-            if (cleanName.includes("sodoma") || puvodniIndex === 5) {
+            if (cleanName.includes("sodoma") || puvodniIndex === 2) { // Řádek 3 (index 2)
                 return '<img src="sodoma.png" alt="sodoma" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">';
             }
-            if (cleanName.includes("dvorka") || puvodniIndex === 6) {
+            if (cleanName.includes("dvorka") || puvodniIndex === 3) { // Řádek 4 (index 3)
                 return '<img src="dvorka.png" alt="dvorka" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">';
+            }
+            if (cleanName.includes("lars") || puvodniIndex === 4) { // Řádek 5 (index 4)
+                return '<img src="lars.png" alt="lars" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">';
             }
             return getInitials(name);
         }
@@ -627,7 +644,8 @@
             const container = document.getElementById('zajici-container');
             container.innerHTML = '';
             
-            const hledaneIndexy = [2, 4, 5, 6]; 
+            // Nové indexy pro VIP Zajíce z 2. ligy (původní řádky 2, 3, 4, 5 odpovídají indexům 1, 2, 3, 4)
+            const hledaneIndexy = [1, 2, 3, 4]; 
             const zajici = vsichniHraci.filter(h => hledaneIndexy.includes(h.puvodniIndex));
 
             if(zajici.length === 0) {
@@ -646,7 +664,7 @@
                 card.onclick = () => otevriModal(zajic);
 
                 const cleanName = zajic.jmeno.toLowerCase();
-                const isCustomAvatar = cleanName.includes("podroužek") || cleanName.includes("folpi") || cleanName.includes("sodoma") || cleanName.includes("dvorka");
+                const isCustomAvatar = cleanName.includes("podroužek") || cleanName.includes("sodoma") || cleanName.includes("dvorka") || cleanName.includes("lars");
                 const bgStyle = isCustomAvatar ? 'background: transparent;' : '';
 
                 const ziskaKorunu = zajic.celkem === maxZajicPoints && maxZajicPoints > 0;
@@ -741,7 +759,7 @@
                     div.className = 'autocomplete-item';
                     
                     const cleanName = hrac.jmeno.toLowerCase();
-                    const isCustomAvatar = cleanName.includes("podroužek") || cleanName.includes("folpi") || cleanName.includes("sodoma") || cleanName.includes("dvorka");
+                    const isCustomAvatar = cleanName.includes("podroužek") || cleanName.includes("sodoma") || cleanName.includes("dvorka") || cleanName.includes("lars");
                     const bgStyle = isCustomAvatar ? 'background: transparent;' : 'background: linear-gradient(135deg, #ff4d29, #ffd700);';
 
                     div.innerHTML = `
@@ -773,7 +791,7 @@
         function otevriModal(hrac) {
             const avatarDiv = document.getElementById('modalMainAvatar');
             const cleanName = hrac.jmeno.toLowerCase();
-            const isCustomAvatar = cleanName.includes("podroužek") || cleanName.includes("folpi") || cleanName.includes("sodoma") || cleanName.includes("dvorka");
+            const isCustomAvatar = cleanName.includes("podroužek") || cleanName.includes("sodoma") || cleanName.includes("dvorka") || cleanName.includes("lars");
             
             avatarDiv.style.background = isCustomAvatar ? 'transparent' : 'linear-gradient(135deg, #ff4d29, #ffd700)';
             avatarDiv.innerHTML = getAvatarHTML(hrac.jmeno, hrac.puvodniIndex);
@@ -804,7 +822,6 @@
                         <div class="team-col" style="justify-content: flex-start; padding-top: 15px;">
                             <span class="t-pos">${j - 3}.</span>
                             <img src="${ofikoLogo}" alt="${ofikoTym}" class="t-logo" title="${ofikoTym}">
-                            <span style="font-size:0.8rem; color:var(--text-muted); text-align:center; display:block; padding:0 3px;">${ofikoTym}</span>
                         </div>
                     `;
 
@@ -845,10 +862,10 @@
             const bonusesContainer = document.getElementById('modalBonuses');
             bonusesContainer.innerHTML = '';
 
-            // 6 bonusových otázek pro 2. ligu v indexech V až AA (což odpovídá sloupcům s indexy 21 až 26)
+            // 6 bonusových otázek pro 2. ligu v indexech V až AA (21 až 26)
             if (hrac.tipyData.length > 0 && hrac.kontrolaData.length > 0) {
                 for (let k = 0; k < 6; k++) {
-                    const colIndex = 21 + k; // Začíná na sloupci V (index 21)
+                    const colIndex = 21 + k;
                     const tipOdpoved = hrac.tipyData[colIndex] ? hrac.tipyData[colIndex].replace(/"/g, '').trim() : 'Nevyplněno';
                     const ziskaneBody = hrac.kontrolaData[colIndex] ? hrac.kontrolaData[colIndex].replace(/"/g, '').trim() : '0';
                     const spravnaOdpoved = spravneOdpovediRow[colIndex] ? spravneOdpovediRow[colIndex].replace(/"/g, '').trim() : 'Zatím neznámá';
@@ -889,7 +906,6 @@
                         <div class="team-col" style="justify-content: flex-start; padding-top: 15px;">
                             <span class="t-pos">${j - 3}.</span>
                             <img src="${logoUrl}" alt="${spravnyTym}" class="t-logo" title="${spravnyTym}">
-                            <span style="font-size:0.8rem; color:var(--text-muted); text-align:center; display:block; padding:0 3px;">${spravnyTym}</span>
                         </div>
                     `;
                 }
@@ -987,13 +1003,14 @@
                 { col: 6, title: "Počet gólů střelce?" }
             ];
 
+            // Odfiltrovat jen řádky týmů z prvního sloupce pro bonusovou matrix
             let vsechnyTymoveRadky = [];
             dataVyskytParsed.forEach((row) => {
                 if (row && row[0] && teamLogos[row[0].trim()]) {
                     vsechnyTymoveRadky.push(row);
                 }
             });
-            // Druhá 16-tka týmů
+            // Druhá 16-tka týmů je na indexech 16 až 31
             let bonusTymoveRadky = vsechnyTymoveRadky.slice(16, 32);
 
             let html = '';
@@ -1017,7 +1034,7 @@
 
         function vykresliPrehledStrelci() {
             let strelci = [];
-            // Sloupec S má index 18. Čteme od řádku 52 (index 51)
+            // Sloupec S má index 18.
             for(let r = 51; r < dataVyskytParsed.length; r++) {
                 const rowData = dataVyskytParsed[r];
                 if(rowData && rowData[18] && rowData[18].trim() !== '') {
